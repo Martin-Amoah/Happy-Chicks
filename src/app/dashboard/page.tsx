@@ -1,6 +1,8 @@
+
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SampleBarChart } from "@/components/charts/SampleBarChart";
 import { SampleLineChart } from "@/components/charts/SampleLineChart";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Users, Package, AlertTriangle, Feather, Activity } from "lucide-react";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { EggIcon } from "@/components/icons/EggIcon";
@@ -99,8 +101,8 @@ export default function DashboardPage() {
           data={feedConsumptionData}
           dataKeys={{x: "category", y1: "current", y2: "optimal"}}
           config={{
-            desktop: { label: "Current", color: "hsl(var(--chart-2))" }, // Renaming for context
-            mobile: { label: "Optimal", color: "hsl(var(--chart-3))" }, // Renaming for context
+            desktop: { label: "Current", color: "hsl(var(--chart-2))" }, 
+            mobile: { label: "Optimal", color: "hsl(var(--chart-3))" }, 
           }}
         />
       </div>
