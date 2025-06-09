@@ -87,7 +87,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
          <footer className="border-t p-4 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} CluckTrack. All rights reserved.
+            © {new Date().getFullYear()} Happy Chicks. All rights reserved.
           </footer>
       </SidebarInset>
     </SidebarProvider>
