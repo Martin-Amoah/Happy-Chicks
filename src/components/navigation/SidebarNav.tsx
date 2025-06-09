@@ -38,7 +38,7 @@ export function SidebarNav() {
         
         return (
           <SidebarMenuItem key={item.href}>
-            <Link href={item.href} passHref legacyBehavior>
+            <Link href={item.href}>
               <SidebarMenuButton
                 variant="default"
                 className={cn(
@@ -58,3 +58,4 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
+
