@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -11,7 +10,6 @@ import { BirdIcon } from "@/components/icons/BirdIcon";
 import { LayoutDashboard, FileText, Lightbulb, BookOpen, Settings2, Users, ListChecks, ShoppingCart } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Documentation", icon: BookOpen },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Inventory", icon: FeedIcon },
   { href: "/egg-production", label: "Egg Production", icon: EggIcon },
