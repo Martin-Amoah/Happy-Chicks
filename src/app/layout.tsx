@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'CluckTrack - Farm Management System',
+  title: 'Happy Chicks - Farm Management System',
   description: 'Automated Farm Management System for Happy Chicks',
 };
 

@@ -23,7 +23,7 @@ export default function UserManagementPage() {
             <CardTitle className="font-headline flex items-center gap-2">
               <Users className="h-6 w-6 text-primary" /> User Management
             </CardTitle>
-            <CardDescription>Manage users, roles, and permissions within CluckTrack.</CardDescription>
+            <CardDescription>Manage users, roles, and permissions within Happy Chicks.</CardDescription>
           </div>
           <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
             <UserPlus className="mr-2 h-4 w-4" /> Add New User
