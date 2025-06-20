@@ -8,10 +8,9 @@ import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui
 import { EggIcon } from "@/components/icons/EggIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
 import { BirdIcon } from "@/components/icons/BirdIcon";
-import { LayoutDashboard, FileText, Lightbulb, BookOpen, Settings2, Users, ListChecks, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, FileText, Lightbulb, Settings2, Users, ListChecks, ShoppingCart } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Documentation", icon: BookOpen },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Inventory", icon: FeedIcon },
   { href: "/egg-production", label: "Egg Production", icon: EggIcon },
@@ -31,10 +30,7 @@ export function SidebarNav() {
     <SidebarMenu>
       {navItems.map((item) => {
         const Icon = item.icon;
-        // Special handling for root path matching, as usePathname might return `/`
-        // and we want to match exactly for documentation or broader for others.
-        // For this app, '/' is Documentation, so exact match is fine.
-        const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
+        const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard") || (item.href === "/dashboard" && pathname === "/");
         
         return (
           <SidebarMenuItem key={item.href}>
@@ -58,4 +54,3 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
-
