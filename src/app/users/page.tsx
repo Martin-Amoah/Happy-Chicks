@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 
 // Mock data for demonstration
 const userData = [
-  { id: '1', name: 'Manager Alpha', email: 'manager@clucktrack.com', role: 'Manager', status: 'Active', lastLogin: '2024-07-21 10:00 AM' },
-  { id: '2', name: 'Worker Bravo', email: 'worker1@clucktrack.com', role: 'Worker', status: 'Active', lastLogin: '2024-07-21 08:30 AM' },
-  { id: '3', name: 'Worker Charlie', email: 'worker2@clucktrack.com', role: 'Worker', status: 'Inactive', lastLogin: '2024-07-15 09:00 AM' },
+  { id: '1', name: 'Manager Alpha', email: 'manager@happychicks.com', role: 'Manager', status: 'Active', lastLogin: '2024-07-21 10:00 AM' },
+  { id: '2', name: 'Worker Bravo', email: 'worker1@happychicks.com', role: 'Worker', status: 'Active', lastLogin: '2024-07-21 08:30 AM' },
+  { id: '3', name: 'Worker Charlie', email: 'worker2@happychicks.com', role: 'Worker', status: 'Inactive', lastLogin: '2024-07-15 09:00 AM' },
 ];
 
 export default function UserManagementPage() {

@@ -1,7 +1,7 @@
-
 "use client";
 
 import React from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   SidebarProvider,
   Sidebar,
@@ -41,8 +41,25 @@ function ThemeToggle() {
   );
 }
 
-
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Hide sidebar/header/footer on auth pages
+  if (
+    pathname === "/auth/signin" ||
+    pathname === "/auth/signup" ||
+    pathname?.startsWith("/auth/signin") ||
+    pathname?.startsWith("/auth/signup")
+  ) {
+    return <>{children}</>;
+  }
+
+  const handleLogout = () => {
+    // TODO: Add actual logout logic (clear auth tokens, etc.) if needed
+    router.push("/auth/signin");
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <SidebarRail />
@@ -72,7 +89,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
              <ThemeToggle />
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive" aria-label="Logout">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-sidebar-foreground hover:text-destructive"
+              aria-label="Logout"
+              onClick={handleLogout}
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

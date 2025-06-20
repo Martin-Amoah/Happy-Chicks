@@ -1,5 +1,12 @@
 import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  redirect("/dashboard");
+  // TODO: Check authentication status
+  const isAuthenticated = false;
+
+  if (isAuthenticated) {
+    redirect("/dashboard");
+  }
+
+  redirect("/auth/signin");
 }
