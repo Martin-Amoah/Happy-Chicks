@@ -9,10 +9,10 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2, LogIn } from "lucide-react";
-import { EggIcon } from '@/components/icons/EggIcon'; // Using EggIcon for branding
+import { EggIcon } from '@/components/icons/EggIcon';
+import { createClient } from '@/lib/supabase/client';
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -37,19 +37,20 @@ export default function LoginPage() {
   const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
     setIsLoading(true);
     setLoginError(null);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
 
-    // Simulate login logic
-    if (data.email === "manager@clucktrack.com" && data.password === "password") {
-      router.push('/dashboard');
-    } else if (data.email === "worker@clucktrack.com" && data.password === "password") {
-      router.push('/dashboard'); // Or a worker-specific dashboard if exists
+    if (error) {
+      setLoginError(error.message);
+      setIsLoading(false);
+    } else {
+      // Refresh the page to allow middleware to redirect
+      router.refresh();
     }
-    else {
-      setLoginError("Invalid email or password. Please try again.");
-    }
-    setIsLoading(false);
   };
 
   return (

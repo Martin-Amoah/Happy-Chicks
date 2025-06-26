@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   SidebarProvider,
   Sidebar,
@@ -15,8 +16,9 @@ import {
 import { SidebarNav } from "@/components/navigation/SidebarNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, LogOut } from "lucide-react"; // Assuming a theme toggle might be added
+import { Moon, Sun, LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/client";
 
 // Simple Theme Toggle (conceptual, full implementation would use context/localStorage)
 function ThemeToggle() {
@@ -43,6 +45,14 @@ function ThemeToggle() {
 
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.refresh();
+  };
+  
   return (
     <SidebarProvider defaultOpen={true}>
       <SidebarRail />
@@ -72,7 +82,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
              <ThemeToggle />
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive" aria-label="Logout">
+            <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive" aria-label="Logout" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
