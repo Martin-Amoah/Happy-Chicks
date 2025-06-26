@@ -18,14 +18,36 @@ export default async function SettingsPage() {
   const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
   const farmConfigPromise = supabase.from('farm_config').select('*').eq('id', 1).single();
 
-  const [{ data: profile }, { data: farmConfig }] = await Promise.all([profilePromise, farmConfigPromise]);
+  const [profileResult, farmConfigResult] = await Promise.all([
+    profilePromise,
+    farmConfigPromise,
+  ]);
+
+  const { data: profile, error: profileError } = profileResult;
+  const { data: farmConfig, error: farmConfigError } = farmConfigResult;
+
+  // More robust error checking
+  if (profileError || farmConfigError) {
+    console.error("Error fetching settings:", { profileError, farmConfigError });
+    return (
+        <Card>
+            <CardHeader>
+              <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
+              <CardDescription>
+                Could not fetch settings data. Please try again later. If the problem persists, check the server logs.
+              </CardDescription>
+            </CardHeader>
+        </Card>
+    );
+  }
   
+  // This check is also important for cases where there's no error, but data is null (e.g., profile not found).
   if (!profile || !farmConfig) {
       return (
           <Card>
               <CardHeader>
                 <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
-                <CardDescription>Could not fetch settings data. Please ensure the database migration has been run.</CardDescription>
+                <CardDescription>Could not find settings or profile data. Please ensure the database migration has been run correctly.</CardDescription>
               </CardHeader>
           </Card>
       );
@@ -46,7 +68,7 @@ export default async function SettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <NotificationSettingsForm profile={profile} />
-        <AccountSecurityForm email={user.email!} />
+        <AccountSecurityForm email={user.email ?? 'No email available'} />
       </div>
       
       {isManager && <FarmConfigurationForm config={farmConfig} />}
