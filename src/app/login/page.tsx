@@ -1,57 +1,37 @@
-
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import React from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Loader2, LogIn } from "lucide-react";
 import { EggIcon } from '@/components/icons/EggIcon';
-import { createClient } from '@/lib/supabase/client';
+import { login } from './actions';
 
-const loginFormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(1, { message: "Password is required." }),
-});
+function LoginButton() {
+  const { pending } = useFormStatus();
 
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+  return (
+    <Button type="submit" disabled={pending} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Logging in...
+        </>
+      ) : (
+        <>
+          <LogIn className="mr-2 h-4 w-4" /> Login
+        </>
+      )}
+    </Button>
+  );
+}
+
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
-    setIsLoading(true);
-    setLoginError(null);
-    
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      setLoginError(error.message);
-      setIsLoading(false);
-    } else {
-      // Refresh the page to allow middleware to redirect
-      router.refresh();
-    }
-  };
+  const [state, formAction] = useFormState(login, undefined);
 
   return (
     <Card className="w-full max-w-sm shadow-xl">
@@ -62,55 +42,27 @@ export default function LoginPage() {
         <CardTitle className="text-3xl font-bold font-headline">CluckTrack Login</CardTitle>
         <CardDescription>Enter your credentials to access your farm dashboard.</CardDescription>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="e.g., user@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {loginError && (
-              <p className="text-sm font-medium text-destructive">{loginError}</p>
+      <form action={formAction}>
+        <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input id="email" name="email" type="email" placeholder="e.g., user@example.com" required />
+              {state?.errors?.email && <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>}
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" placeholder="••••••••" required />
+              {state?.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
+            </div>
+            
+            {state?.message && !state.errors && (
+              <p className="text-sm font-medium text-destructive">{state.message}</p>
             )}
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging in...
-                </>
-              ) : (
-                <>
-                  <LogIn className="mr-2 h-4 w-4" /> Login
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
+        </CardContent>
+        <CardFooter>
+          <LoginButton />
+        </CardFooter>
+      </form>
     </Card>
   );
 }
