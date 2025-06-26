@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
 import { AddEggRecordForm } from "./add-egg-record-form";
-import { Button } from "@/components/ui/button";
+import { EditEggRecordButton } from "./edit-egg-record-button";
+import { DeleteEggCollectionButton } from "./delete-button";
 
 export default async function EggProductionPage() {
   const supabase = createClient();
@@ -46,8 +47,9 @@ export default async function EggProductionPage() {
                   <TableCell>{record.total_eggs}</TableCell>
                   <TableCell>{record.broken_eggs}</TableCell>
                   <TableCell>{record.collected_by}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">Edit</Button>
+                  <TableCell className="text-right space-x-1">
+                    <EditEggRecordButton record={record} />
+                    <DeleteEggCollectionButton id={record.id} />
                   </TableCell>
                 </TableRow>
               ))}
