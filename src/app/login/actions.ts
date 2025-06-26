@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { AuthApiError } from '@supabase/supabase-js'
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -32,6 +33,13 @@ export async function login(prevState: { message: string, errors?: z.ZodError['f
 
   if (error) {
     console.error(error);
+    // A common issue is that the user's email is not confirmed.
+    if (error instanceof AuthApiError && error.message.includes('Email not confirmed')) {
+      return {
+        message: 'Email not confirmed. Please check your inbox for a confirmation link.',
+        success: false,
+      }
+    }
     return {
         message: 'Could not authenticate user. Please check your credentials.',
         success: false,
