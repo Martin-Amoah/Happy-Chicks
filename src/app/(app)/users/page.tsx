@@ -1,18 +1,30 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Users, UserPlus, Edit3, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import { formatDistanceToNow } from 'date-fns';
+import { AddUserButton } from "./add-user-button";
+import { EditUserButton } from "./edit-user-button";
+import { DeleteUserButton } from "./delete-user-button";
 
 export default async function UserManagementPage() {
   const supabase = createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+
   const { data: users, error } = await supabase
     .from('user_details')
     .select('*')
     .order('email');
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser?.id!)
+    .single();
+    
+  const isManager = profile?.role === 'Manager';
 
   if (error) {
     console.error("Error fetching users:", error.message);
@@ -39,9 +51,7 @@ export default async function UserManagementPage() {
             </CardTitle>
             <CardDescription>Manage users, roles, and permissions within CluckTrack.</CardDescription>
           </div>
-          <Button className="bg-accent text-accent-foreground hover:bg-accent/90" disabled>
-            <UserPlus className="mr-2 h-4 w-4" /> Add New User
-          </Button>
+          {isManager && <AddUserButton />}
         </CardHeader>
       </Card>
 
@@ -78,8 +88,14 @@ export default async function UserManagementPage() {
                   </TableCell>
                   <TableCell>{user.last_sign_in_at ? `${formatDistanceToNow(new Date(user.last_sign_in_at))} ago` : 'Never'}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <Button variant="ghost" size="icon" className="hover:text-accent" disabled><Edit3 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="hover:text-destructive" disabled><Trash2 className="h-4 w-4" /></Button>
+                    {isManager && currentUser?.id !== user.id ? (
+                        <>
+                            <EditUserButton user={user} />
+                            <DeleteUserButton userId={user.id} userName={user.full_name} />
+                        </>
+                    ) : (
+                        <span className="text-xs text-muted-foreground">No actions</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
