@@ -1,12 +1,38 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings2, Bell, ShieldCheck, Users } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Settings2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from 'next/navigation';
+import { NotificationSettingsForm } from "./notification-settings-form";
+import { AccountSecurityForm } from "./account-security-form";
+import { FarmConfigurationForm } from "./farm-configuration-form";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/login');
+  }
+
+  const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
+  const farmConfigPromise = supabase.from('farm_config').select('*').eq('id', 1).single();
+
+  const [{ data: profile }, { data: farmConfig }] = await Promise.all([profilePromise, farmConfigPromise]);
+  
+  if (!profile || !farmConfig) {
+      return (
+          <Card>
+              <CardHeader>
+                <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
+                <CardDescription>Could not fetch settings data. Please ensure the database migration has been run.</CardDescription>
+              </CardHeader>
+          </Card>
+      );
+  }
+
+  const isManager = profile.role === 'Manager';
+
   return (
     <div className="space-y-6">
       <Card>
@@ -19,90 +45,11 @@ export default function SettingsPage() {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-lg flex items-center gap-2"><Bell className="h-5 w-5 text-accent" /> Notifications</CardTitle>
-            <CardDescription>Configure your notification preferences.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between space-x-2 p-2 rounded-md border">
-              <Label htmlFor="lowStockAlerts" className="flex flex-col space-y-1">
-                <span>Low Stock Alerts</span>
-                <span className="font-normal leading-snug text-muted-foreground">
-                  Receive notifications for low feed inventory.
-                </span>
-              </Label>
-              <Switch id="lowStockAlerts" defaultChecked />
-            </div>
-            <div className="flex items-center justify-between space-x-2 p-2 rounded-md border">
-              <Label htmlFor="highMortalityAlerts" className="flex flex-col space-y-1">
-                <span>High Mortality Alerts</span>
-                <span className="font-normal leading-snug text-muted-foreground">
-                  Get alerted for unusual spikes in mortality rates.
-                </span>
-              </Label>
-              <Switch id="highMortalityAlerts" />
-            </div>
-             <div className="flex items-center justify-between space-x-2 p-2 rounded-md border">
-              <Label htmlFor="dailySummary" className="flex flex-col space-y-1">
-                <span>Daily Summary Email</span>
-                <span className="font-normal leading-snug text-muted-foreground">
-                  Receive a daily summary of farm operations.
-                </span>
-              </Label>
-              <Switch id="dailySummary" defaultChecked />
-            </div>
-          </CardContent>
-           <CardContent>
-            <Button>Save Notification Preferences</Button>
-           </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-lg flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-accent" /> Account & Security</CardTitle>
-            <CardDescription>Manage your account details and security settings.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" defaultValue="manager@clucktrack.com" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Change Password</Label>
-              <Input id="password" type="password" placeholder="New Password" />
-            </div>
-            <Button>Update Account</Button>
-          </CardContent>
-        </Card>
+        <NotificationSettingsForm profile={profile} />
+        <AccountSecurityForm email={user.email!} />
       </div>
-       <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-lg flex items-center gap-2"><Users className="h-5 w-5 text-accent" /> Farm Configuration</CardTitle>
-            <CardDescription>Set up farm-specific parameters.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="space-y-1.5">
-              <Label htmlFor="farmName">Farm Name</Label>
-              <Input id="farmName" defaultValue="Happy Chicks Farm" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="shedCount">Number of Sheds</Label>
-              <Input id="shedCount" type="number" defaultValue="5" />
-            </div>
-             <div className="space-y-1.5">
-              <Label htmlFor="defaultCurrency">Default Currency</Label>
-              <Input id="defaultCurrency" defaultValue="GHS" />
-            </div>
-             <div className="space-y-1.5">
-              <Label htmlFor="timezone">Timezone</Label>
-              <Input id="timezone" defaultValue="Africa/Accra" />
-            </div>
-          </CardContent>
-           <CardContent>
-            <Button>Save Farm Configuration</Button>
-           </CardContent>
-        </Card>
+      
+      {isManager && <FarmConfigurationForm config={farmConfig} />}
     </div>
   );
 }
