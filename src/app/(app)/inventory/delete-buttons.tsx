@@ -19,18 +19,17 @@ function SubmitButton() {
 
 export function DeleteFeedStockButton({ id }: { id: string }) {
     const { toast } = useToast();
-    const formAction = async (formData: FormData) => {
-        const result = await deleteFeedStock(formData.get('id') as string);
-        toast({
-            title: result.success ? "Success" : "Error",
-            description: result.message,
-            variant: result.success ? "default" : "destructive",
-        });
-    };
+    const deleteActionWithId = deleteFeedStock.bind(null, id);
 
     return (
-        <form action={formAction}>
-            <input type="hidden" name="id" value={id} />
+        <form action={async () => {
+            const result = await deleteActionWithId();
+            toast({
+                title: result.success ? "Success" : "Error",
+                description: result.message,
+                variant: result.success ? "default" : "destructive",
+            });
+        }}>
             <SubmitButton />
         </form>
     );
@@ -38,18 +37,17 @@ export function DeleteFeedStockButton({ id }: { id: string }) {
 
 export function DeleteFeedAllocationButton({ id }: { id: string }) {
     const { toast } = useToast();
-    const formAction = async (formData: FormData) => {
-        const result = await deleteFeedAllocation(formData.get('id') as string);
-        toast({
-            title: result.success ? "Success" : "Error",
-            description: result.message,
-            variant: result.success ? "default" : "destructive",
-        });
-    };
-    
+    const deleteActionWithId = deleteFeedAllocation.bind(null, id);
+
     return (
-        <form action={formAction}>
-            <input type="hidden" name="id" value={id} />
+        <form action={async () => {
+            const result = await deleteActionWithId();
+            toast({
+                title: result.success ? "Success" : "Error",
+                description: result.message,
+                variant: result.success ? "default" : "destructive",
+            });
+        }}>
             <SubmitButton />
         </form>
     );

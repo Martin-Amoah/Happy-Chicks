@@ -108,7 +108,7 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
 
 
 // Action to delete a feed stock item
-export async function deleteFeedStock(id: string) {
+export async function deleteFeedStock(id: string): Promise<{ message: string; success: boolean; }> {
   const supabase = createClient();
   const { error } = await supabase.from('feed_stock').delete().match({ id });
 
@@ -122,7 +122,7 @@ export async function deleteFeedStock(id: string) {
 }
 
 // Action to delete a feed allocation record
-export async function deleteFeedAllocation(id: string) {
+export async function deleteFeedAllocation(id: string): Promise<{ message: string; success: boolean; }> {
     const supabase = createClient();
     const { error } = await supabase.from('feed_allocations').delete().match({ id });
 

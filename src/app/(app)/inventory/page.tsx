@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CircleAlert, PackagePlus } from "lucide-react";
+import { CircleAlert, Edit } from "lucide-react";
 import { AddFeedStockForm } from "./add-feed-stock-form";
 import { AddFeedAllocationForm } from "./add-feed-allocation-form";
 import { DeleteFeedStockButton, DeleteFeedAllocationButton } from "./delete-buttons";
@@ -54,7 +54,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.cost ? `$${Number(item.cost).toFixed(2)}` : 'N/A'}</TableCell>
                   <TableCell className="text-right space-x-1">
                     <Button variant="ghost" size="icon" className="hover:text-accent" disabled> {/* TODO: Edit functionality */}
-                      <PackagePlus className="h-4 w-4" />
+                      <Edit className="h-4 w-4" />
                     </Button>
                     <DeleteFeedStockButton id={item.id} />
                   </TableCell>
@@ -101,7 +101,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.allocated_by}</TableCell>
                   <TableCell className="text-right space-x-1">
                      <Button variant="ghost" size="icon" className="hover:text-accent" disabled> {/* TODO: Edit functionality */}
-                        <PackagePlus className="h-4 w-4" />
+                        <Edit className="h-4 w-4" />
                      </Button>
                     <DeleteFeedAllocationButton id={item.id} />
                   </TableCell>
