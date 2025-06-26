@@ -15,45 +15,42 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  let profile;
-  let farmConfig;
+  // Fetch profile and farm config sequentially for robust error handling
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
-  try {
-    const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
-    const farmConfigPromise = supabase.from('farm_config').select('*').eq('id', 1).single();
+  const { data: farmConfig, error: farmConfigError } = await supabase
+    .from('farm_config')
+    .select('*')
+    .eq('id', 1)
+    .single();
 
-    const [profileResult, farmConfigResult] = await Promise.all([
-      profilePromise,
-      farmConfigPromise,
-    ]);
-    
-    // Throw if either Supabase query returned an error
-    if (profileResult.error) throw profileResult.error;
-    if (farmConfigResult.error) throw farmConfigResult.error;
-
-    profile = profileResult.data;
-    farmConfig = farmConfigResult.data;
-
-  } catch (error: any) {
-    console.error("Error fetching settings:", error);
+  // Gracefully handle any database errors
+  if (profileError || farmConfigError) {
+    const errorMessage = profileError?.message || farmConfigError?.message || "An unknown database error occurred.";
+    console.error("Error fetching settings:", profileError || farmConfigError);
     return (
         <Card>
             <CardHeader>
               <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
               <CardDescription>
-                Could not fetch settings data: {error.message}. Please try refreshing the page. If the problem persists, check the server logs.
+                Could not fetch settings data: {errorMessage}. Please refresh the page. If the problem persists, check your database connection and RLS policies.
               </CardDescription>
             </CardHeader>
         </Card>
     );
   }
   
+  // Handle cases where data is not found (e.g., initial setup)
   if (!profile || !farmConfig) {
       return (
           <Card>
               <CardHeader>
                 <CardTitle className="text-destructive">Settings Data Not Found</CardTitle>
-                <CardDescription>Could not find your profile or the farm configuration. Please ensure the database migration scripts have been run correctly.</CardDescription>
+                <CardDescription>Could not find your profile or the farm configuration. Please ensure the database migration scripts have been run correctly and that RLS policies allow access.</CardDescription>
               </CardHeader>
           </Card>
       );
