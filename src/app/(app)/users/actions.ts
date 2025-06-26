@@ -54,7 +54,7 @@ export async function inviteUser(prevState: InviteFormState | undefined, formDat
   const { email, full_name, role } = validatedFields.data;
 
   // IMPORTANT: Admin actions require the service role key.
-  // This key should be in your .env.local file.
+  // This key should be in your .env file.
   const supabaseAdmin = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -63,7 +63,7 @@ export async function inviteUser(prevState: InviteFormState | undefined, formDat
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
     data: { full_name, role },
-    redirectTo: '/login'
+    redirectTo: `${new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002').origin}/login`
   });
 
   if (error) {
