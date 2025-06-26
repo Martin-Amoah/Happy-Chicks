@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 // Simple Theme Toggle (conceptual, full implementation would use context/localStorage)
 function ThemeToggle() {
@@ -44,13 +45,19 @@ function ThemeToggle() {
 }
 
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children, user }: { children: React.ReactNode; user: User }) {
   const router = useRouter();
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.refresh();
+  };
+
+  const getInitials = (email?: string) => {
+    if (!email) return "U";
+    const namePart = email.split('@')[0];
+    return namePart ? namePart[0].toUpperCase() : "U";
   };
   
   return (
@@ -73,11 +80,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
              <Avatar className="h-9 w-9">
               <AvatarImage src="https://placehold.co/40x40.png" alt="User Avatar" data-ai-hint="person face" />
-              <AvatarFallback>M</AvatarFallback>
+              <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="text-sm font-medium text-sidebar-foreground">Farm Manager</span>
-              <span className="text-xs text-muted-foreground">manager@clucktrack.com</span>
+              <span className="text-sm font-medium text-sidebar-foreground">{user.email?.split('@')[0]}</span>
+              <span className="text-xs text-muted-foreground">{user.email}</span>
             </div>
           </div>
           <div className="flex items-center justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">

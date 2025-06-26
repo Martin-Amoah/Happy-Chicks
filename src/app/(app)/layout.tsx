@@ -1,19 +1,31 @@
 
 import type { Metadata } from 'next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'CluckTrack - Farm Management System',
   description: 'Automated Farm Management System for Happy Chicks',
 };
 
-export default function AuthenticatedAppLayout({
+export default async function AuthenticatedAppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    // This should not happen because of middleware, but as a safeguard
+    redirect('/login');
+  }
+
   return (
-    <AppLayout>
+    <AppLayout user={user}>
       {children}
     </AppLayout>
   );
