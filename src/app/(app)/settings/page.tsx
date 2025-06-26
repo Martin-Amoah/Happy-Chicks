@@ -15,39 +15,45 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
-  const farmConfigPromise = supabase.from('farm_config').select('*').eq('id', 1).single();
+  let profile;
+  let farmConfig;
 
-  const [profileResult, farmConfigResult] = await Promise.all([
-    profilePromise,
-    farmConfigPromise,
-  ]);
+  try {
+    const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
+    const farmConfigPromise = supabase.from('farm_config').select('*').eq('id', 1).single();
 
-  const { data: profile, error: profileError } = profileResult;
-  const { data: farmConfig, error: farmConfigError } = farmConfigResult;
+    const [profileResult, farmConfigResult] = await Promise.all([
+      profilePromise,
+      farmConfigPromise,
+    ]);
+    
+    // Throw if either Supabase query returned an error
+    if (profileResult.error) throw profileResult.error;
+    if (farmConfigResult.error) throw farmConfigResult.error;
 
-  // More robust error checking
-  if (profileError || farmConfigError) {
-    console.error("Error fetching settings:", { profileError, farmConfigError });
+    profile = profileResult.data;
+    farmConfig = farmConfigResult.data;
+
+  } catch (error: any) {
+    console.error("Error fetching settings:", error);
     return (
         <Card>
             <CardHeader>
               <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
               <CardDescription>
-                Could not fetch settings data. Please try again later. If the problem persists, check the server logs.
+                Could not fetch settings data: {error.message}. Please try refreshing the page. If the problem persists, check the server logs.
               </CardDescription>
             </CardHeader>
         </Card>
     );
   }
   
-  // This check is also important for cases where there's no error, but data is null (e.g., profile not found).
   if (!profile || !farmConfig) {
       return (
           <Card>
               <CardHeader>
-                <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
-                <CardDescription>Could not find settings or profile data. Please ensure the database migration has been run correctly.</CardDescription>
+                <CardTitle className="text-destructive">Settings Data Not Found</CardTitle>
+                <CardDescription>Could not find your profile or the farm configuration. Please ensure the database migration scripts have been run correctly.</CardDescription>
               </CardHeader>
           </Card>
       );
