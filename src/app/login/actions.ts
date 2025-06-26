@@ -41,7 +41,7 @@ export async function login(prevState: { message: string, errors?: z.ZodError['f
       }
     }
     return {
-        message: 'Could not authenticate user. Please check your credentials.',
+        message: `Authentication failed: ${error.message}`,
         success: false,
     }
   }
