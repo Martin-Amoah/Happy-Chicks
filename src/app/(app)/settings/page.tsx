@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from 'next/navigation';
