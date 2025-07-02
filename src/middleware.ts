@@ -1,9 +1,7 @@
-
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // This `response` object will be passed through the entire middleware chain
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -19,14 +17,23 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          // The `set` method is called by Supabase when a session is updated.
-          // We need to update both the request and response cookies.
+          // If the cookie is set, update the request and response cookies.
           request.cookies.set({ name, value, ...options })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
           response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          // The `remove` method is called by Supabase when a user signs out.
+          // If the cookie is removed, update the request and response cookies.
           request.cookies.set({ name, value: '', ...options })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
           response.cookies.set({ name, value: '', ...options })
         },
       },
@@ -34,7 +41,9 @@ export async function middleware(request: NextRequest) {
   )
 
   // This will refresh the session if expired and update the cookies.
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
 
