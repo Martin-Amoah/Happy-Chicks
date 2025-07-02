@@ -1,5 +1,5 @@
 
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Settings2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from 'next/navigation';
@@ -15,61 +15,25 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  // Fetch profile first
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  // Fetch profile and farm config in parallel
+  const [profileResult, farmConfigResult] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('farm_config').select('*').eq('id', 1).single()
+  ]);
 
-  if (profileError) {
-    console.error("Error fetching settings data (profile):", profileError);
-    return (
-        <Card>
-            <CardHeader>
-              <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
-              <CardDescription>Could not fetch your profile data: {profileError.message}. Please refresh the page.</CardDescription>
-            </CardHeader>
-        </Card>
-    );
-  }
-  
-  if (!profile) {
+  const { data: profile, error: profileError } = profileResult;
+  const { data: farmConfig, error: farmConfigError } = farmConfigResult;
+
+  if (profileError || !profile || farmConfigError || !farmConfig) {
+      const errorMessage = profileError?.message || farmConfigError?.message || "Your user profile or farm configuration could not be loaded.";
+      console.error("Error fetching settings data:", errorMessage);
       return (
           <Card>
               <CardHeader>
-                <CardTitle className="text-destructive">Settings Data Missing</CardTitle>
-                <CardDescription>Your user profile was not found. Please ensure the database migration scripts have run correctly.</CardDescription>
-              </CardHeader>
-          </Card>
-      );
-  }
-  
-  // Fetch farm config second
-  const { data: farmConfig, error: farmConfigError } = await supabase
-    .from('farm_config')
-    .select('*')
-    .eq('id', 1)
-    .single();
-
-  if (farmConfigError) {
-    console.error("Error fetching settings data (farm config):", farmConfigError);
-    return (
-        <Card>
-            <CardHeader>
-              <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
-              <CardDescription>Could not fetch farm configuration: {farmConfigError.message}. Please refresh the page.</CardDescription>
-            </CardHeader>
-        </Card>
-    );
-  }
-
-  if (!farmConfig) {
-      return (
-          <Card>
-              <CardHeader>
-                <CardTitle className="text-destructive">Settings Data Missing</CardTitle>
-                <CardDescription>The farm configuration was not found. Please ensure the database migration scripts have run correctly.</CardDescription>
+                <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
+                <CardDescription>
+                    {`Could not fetch settings data: ${errorMessage}. Please refresh the page. If the problem persists, check your database connection and RLS policies.`}
+                </CardDescription>
               </CardHeader>
           </Card>
       );
@@ -93,7 +57,7 @@ export default async function SettingsPage() {
         <AccountSecurityForm email={user.email ?? 'No email available'} />
       </div>
       
-      {isManager ? <FarmConfigurationForm config={farmConfig} /> : null}
+      {isManager && <FarmConfigurationForm config={farmConfig} />}
     </div>
   );
 }

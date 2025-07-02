@@ -1,7 +1,9 @@
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // This `response` object will be passed through the entire middleware chain
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -17,46 +19,39 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          // If the cookie is set, update the request and response cookies
+          // The `set` method is called by Supabase when a session is updated.
+          // We need to update both the request and response cookies.
           request.cookies.set({ name, value, ...options })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          // If the cookie is removed, update the request and response cookies
+          // The `remove` method is called by Supabase when a user signs out.
           request.cookies.set({ name, value: '', ...options })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
           response.cookies.set({ name, value: '', ...options })
         },
       },
     }
   )
 
-  // This will refresh the session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // This will refresh the session if expired and update the cookies.
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
 
-  // Protected routes logic
+  // If the user is not logged in and is trying to access a protected route,
+  // redirect them to the login page.
   if (!user && pathname !== '/login') {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Redirect logged-in user from login page to dashboard
+  // If the user is logged in and tries to access the login page or the root,
+  // redirect them to the dashboard.
   if (user && (pathname === '/login' || pathname === '/')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
-
+  
+  // If we've made it this far, the user is authorized for the page they are requesting.
+  // The `response` object has been updated with any new session cookies.
   return response
 }
 
