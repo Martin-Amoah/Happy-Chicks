@@ -7,14 +7,15 @@ import { NotificationSettingsForm } from "./notification-settings-form";
 import { AccountSecurityForm } from "./account-security-form";
 import { FarmConfigurationForm } from "./farm-configuration-form";
 
-// Define a simple error component to avoid repeating JSX
-function SettingsErrorCard({ message }: { message: string }) {
+// A dedicated error component to avoid repeating JSX
+function SettingsErrorCard({ message, details }: { message: string, details?: string }) {
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
                 <CardDescription>
-                    {`Could not fetch settings data: ${message}. Please refresh the page. If the problem persists, check your database connection and RLS policies.`}
+                    {message}
+                    {details && <p className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">Error details: {details}</p>}
                 </CardDescription>
             </CardHeader>
         </Card>
@@ -26,35 +27,46 @@ export default async function SettingsPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        redirect('/login');
+        // This redirect should be handled by middleware, but it's a safeguard.
+        return redirect('/login');
     }
 
-    // Fetch profile
-    const { data: profile, error: profileError } = await supabase
+    // Step 1: Fetch user profile
+    const profileResponse = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
-
-    if (profileError || !profile) {
-        console.error("Error fetching profile:", profileError?.message);
-        return <SettingsErrorCard message={profileError?.message || "User profile not found."} />;
+    
+    if (profileResponse.error) {
+        console.error("Supabase profile error:", profileResponse.error.message);
+        return <SettingsErrorCard message="Could not load your user profile from the database." details={profileResponse.error.message} />;
     }
+    if (!profileResponse.data) {
+        return <SettingsErrorCard message="Your user profile could not be found." />;
+    }
+    const profile = profileResponse.data;
 
-    // Fetch farm configuration
-    const { data: farmConfig, error: farmConfigError } = await supabase
+    // Step 2: Fetch farm configuration
+    const farmConfigResponse = await supabase
         .from('farm_config')
         .select('*')
         .eq('id', 1) // Assuming a single config row with id 1
         .single();
-    
-    if (farmConfigError || !farmConfig) {
-        console.error("Error fetching farm config:", farmConfigError?.message);
-        return <SettingsErrorCard message={farmConfigError?.message || "Farm configuration not found."} />;
+
+    if (farmConfigResponse.error) {
+        console.error("Supabase farm config error:", farmConfigResponse.error.message);
+        return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigResponse.error.message} />;
     }
+    if (!farmConfigResponse.data) {
+        return <SettingsErrorCard message="The farm configuration could not be found." />;
+    }
+    const farmConfig = farmConfigResponse.data;
     
+    // Step 3: Determine user role
     const isManager = profile.role === 'Manager';
 
+    // Step 4: Render the page
     return (
         <div className="space-y-6">
             <Card>
@@ -71,7 +83,9 @@ export default async function SettingsPage() {
                 <AccountSecurityForm email={user.email ?? 'No email available'} />
             </div>
             
-            {isManager && <FarmConfigurationForm config={farmConfig} />}
+            {isManager && (
+                <FarmConfigurationForm config={farmConfig} />
+            )}
         </div>
     );
 }
