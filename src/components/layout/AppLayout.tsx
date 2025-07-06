@@ -1,8 +1,11 @@
-
 "use client";
 
 import React from "react";
+<<<<<<< HEAD
 import { useRouter } from "next/navigation";
+=======
+import { usePathname, useRouter } from "next/navigation";
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
 import {
   SidebarProvider,
   Sidebar,
@@ -49,6 +52,7 @@ function ThemeToggle() {
   );
 }
 
+<<<<<<< HEAD
 
 export function AppLayout({ children, user }: { children: React.ReactNode; user: User }) {
   const router = useRouter();
@@ -81,6 +85,27 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
   
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || "User";
   
+=======
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Hide sidebar/header/footer on auth pages
+  if (
+    pathname === "/auth/signin" ||
+    pathname === "/auth/signup" ||
+    pathname?.startsWith("/auth/signin") ||
+    pathname?.startsWith("/auth/signup")
+  ) {
+    return <>{children}</>;
+  }
+
+  const handleLogout = () => {
+    // TODO: Add actual logout logic (clear auth tokens, etc.) if needed
+    router.push("/auth/signin");
+  };
+
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
   return (
     <SidebarProvider defaultOpen={true}>
       <SidebarRail />
@@ -104,13 +129,28 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
               <AvatarFallback>{getInitials(user)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+<<<<<<< HEAD
               <span className="text-sm font-medium text-sidebar-foreground">{displayName}</span>
               <span className="text-xs text-muted-foreground">{user.email}</span>
+=======
+              <span className="text-sm font-medium text-sidebar-foreground">Farm Manager</span>
+              <span className="text-xs text-muted-foreground">manager@happychicks.com</span>
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
             </div>
           </div>
           <div className="flex items-center justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
              <ThemeToggle />
+<<<<<<< HEAD
             <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive" aria-label="Logout" onClick={handleLogout}>
+=======
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-sidebar-foreground hover:text-destructive"
+              aria-label="Logout"
+              onClick={handleLogout}
+            >
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
@@ -119,7 +159,11 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
       <SidebarInset className="flex flex-col min-h-screen">
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
           <SidebarTrigger className="md:hidden" />
+<<<<<<< HEAD
           <h1 className="font-headline text-lg font-semibold">Welcome to Happy Chicks</h1>
+=======
+          <h1 className="font-headline text-lg font-semibold">Welcome to Happy chicks</h1>
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           {children}

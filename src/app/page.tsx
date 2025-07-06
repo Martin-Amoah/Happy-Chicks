@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 "use client";
 
@@ -18,4 +19,17 @@ export default function HomePage() {
       <p className="text-lg">Redirecting to login...</p>
     </div>
   );
+=======
+import { redirect } from "next/navigation";
+
+export default function HomePage() {
+  // TODO: Check authentication status
+  const isAuthenticated = false;
+
+  if (isAuthenticated) {
+    redirect("/dashboard");
+  }
+
+  redirect("/auth/signin");
+>>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
 }
