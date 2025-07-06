@@ -12,10 +12,12 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarRail,
+} from "@/components/ui/sidebar";
+import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sheet";
 import { SidebarNav } from "@/components/navigation/SidebarNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
