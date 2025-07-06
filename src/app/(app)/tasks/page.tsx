@@ -8,25 +8,9 @@ import { AddTaskForm } from "./add-task-form";
 import { EditTaskButton } from "./edit-task-button";
 import { DeleteTaskButton } from "./delete-task-button";
 
-// A dedicated error component to avoid repeating JSX
-function TasksErrorCard({ message, details }: { message: string, details?: string }) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-destructive">Error Loading Tasks</CardTitle>
-                <CardDescription>
-                    {message}
-                    {details && <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">{details}</pre>}
-                </CardDescription>
-            </CardHeader>
-        </Card>
-    );
-}
-
 export default async function TasksPage() {
   const supabase = createClient();
   
-  // Step 1: Fetch tasks and users in parallel
   const [tasksResponse, usersResponse] = await Promise.all([
     supabase
       .from('tasks')
@@ -37,7 +21,10 @@ export default async function TasksPage() {
         status,
         created_at,
         notes,
-        assigned_to_id
+        profiles (
+          id,
+          full_name
+        )
       `)
       .order('created_at', { ascending: false }),
     supabase
@@ -48,23 +35,21 @@ export default async function TasksPage() {
   const { data: tasks, error: tasksError } = tasksResponse;
   const { data: users, error: usersError } = usersResponse;
   
-  if (tasksError) {
-    console.error("Error fetching tasks:", tasksError.message);
-    return <TasksErrorCard message="Could not fetch the tasks list from the database." details={tasksError.message} />
+  if (tasksError || usersError) {
+    const errorMessage = tasksError?.message || usersError?.message;
+    console.error("Error fetching data for tasks page:", errorMessage);
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-destructive">Error Loading Tasks</CardTitle>
+                <CardDescription>
+                    Could not fetch data for the tasks page. Please try again later.
+                    {errorMessage && <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">{errorMessage}</pre>}
+                </CardDescription>
+            </CardHeader>
+        </Card>
+    );
   }
-  if (usersError) {
-    console.error("Error fetching users:", usersError.message);
-    return <TasksErrorCard message="Could not fetch the user list from the database." details={usersError.message} />
-  }
-
-  // Step 2: Manually join tasks with user details to create the nested structure expected by components
-  const tasksWithUsers = tasks?.map(task => {
-    const assignedUser = users?.find(user => user.id === task.assigned_to_id);
-    return {
-      ...task,
-      profiles: assignedUser ? { id: assignedUser.id, full_name: assignedUser.full_name } : null
-    };
-  });
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -101,7 +86,7 @@ export default async function TasksPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tasksWithUsers && tasksWithUsers.map((task) => {
+              {tasks && tasks.map((task) => {
                 const badgeStyle = getStatusBadgeVariant(task.status);
                 return (
                   <TableRow key={task.id}>
@@ -123,7 +108,7 @@ export default async function TasksPage() {
                   </TableRow>
                 )
               })}
-              {(!tasksWithUsers || tasksWithUsers.length === 0) && (
+              {(!tasks || tasks.length === 0) && (
                  <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">No tasks found. Create one above!</TableCell>
                  </TableRow>
