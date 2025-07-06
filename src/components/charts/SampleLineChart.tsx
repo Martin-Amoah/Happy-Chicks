@@ -23,9 +23,11 @@ const chartConfig = {
 interface SampleLineChartProps {
   title: string;
   description: string;
-  data?: typeof chartData;
-  config?: typeof chartConfig;
+  data?: any[];
+  config?: ChartConfig;
   dataKeys?: { x: string; y: string };
+  yAxisFormatter?: (value: any) => string;
+  yAxisDomain?: [number | string, number | string];
 }
 
 export function SampleLineChart({
@@ -34,6 +36,8 @@ export function SampleLineChart({
   data = chartData,
   config = chartConfig,
   dataKeys = { x: "date", y: "value" },
+  yAxisFormatter = (value) => `${value}%`,
+  yAxisDomain = ['dataMin - 5', 'dataMax + 5'],
 }: SampleLineChartProps) {
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -58,8 +62,8 @@ export function SampleLineChart({
               axisLine={false}
               stroke="hsl(var(--foreground))"
               fontSize={12}
-              domain={['dataMin - 5', 'dataMax + 5']}
-              tickFormatter={(value) => `${value}%`}
+              domain={yAxisDomain}
+              tickFormatter={yAxisFormatter}
             />
             <Tooltip
               cursor={{ strokeDasharray: '3 3', fill: "hsl(var(--muted))" }}
