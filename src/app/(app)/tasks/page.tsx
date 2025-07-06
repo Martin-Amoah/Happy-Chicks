@@ -8,33 +8,56 @@ import { AddTaskForm } from "./add-task-form";
 import { EditTaskButton } from "./edit-task-button";
 import { DeleteTaskButton } from "./delete-task-button";
 
+// A dedicated error component to avoid repeating JSX
+function TasksErrorCard({ message, details }: { message: string, details?: string }) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-destructive">Error Loading Tasks</CardTitle>
+                <CardDescription>
+                    {message}
+                    {details && <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">{details}</pre>}
+                </CardDescription>
+            </CardHeader>
+        </Card>
+    );
+}
+
 export default async function TasksPage() {
   const supabase = createClient();
   
-  // Step 1: Fetch tasks without the complex join
-  const { data: tasks, error: tasksError } = await supabase
-    .from('tasks')
-    .select(`
-      id,
-      description,
-      due_date,
-      status,
-      created_at,
-      notes,
-      assigned_to_id
-    `)
-    .order('created_at', { ascending: false });
+  // Step 1: Fetch tasks and users in parallel
+  const [tasksResponse, usersResponse] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select(`
+        id,
+        description,
+        due_date,
+        status,
+        created_at,
+        notes,
+        assigned_to_id
+      `)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('user_details')
+      .select('id, full_name')
+  ]);
 
-  // Step 2: Fetch all users from the 'user_details' view for assignment
-  const { data: users, error: usersError } = await supabase
-    .from('user_details')
-    .select('id, full_name');
+  const { data: tasks, error: tasksError } = tasksResponse;
+  const { data: users, error: usersError } = usersResponse;
   
-  if (tasksError || usersError) {
-    console.error("Error fetching data for tasks page:", tasksError || usersError);
+  if (tasksError) {
+    console.error("Error fetching tasks:", tasksError.message);
+    return <TasksErrorCard message="Could not fetch the tasks list from the database." details={tasksError.message} />
+  }
+  if (usersError) {
+    console.error("Error fetching users:", usersError.message);
+    return <TasksErrorCard message="Could not fetch the user list from the database." details={usersError.message} />
   }
 
-  // Step 3: Manually join tasks with user details to create the nested structure expected by components
+  // Step 2: Manually join tasks with user details to create the nested structure expected by components
   const tasksWithUsers = tasks?.map(task => {
     const assignedUser = users?.find(user => user.id === task.assigned_to_id);
     return {
