@@ -1,4 +1,4 @@
-# **App Name**: CluckTrack
+# **App Name**: Happy Chicks
 
 ## Core Features:
 
