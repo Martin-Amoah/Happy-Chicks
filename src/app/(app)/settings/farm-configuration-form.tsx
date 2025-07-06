@@ -3,7 +3,7 @@
 
 import React, { useActionState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -71,9 +71,9 @@ export function FarmConfigurationForm({ config }: { config: FarmConfig }) {
             {state.errors?.timezone && <p className="text-sm font-medium text-destructive">{state.errors.timezone[0]}</p>}
           </div>
         </CardContent>
-        <CardContent>
+        <CardFooter>
           <SubmitButton />
-        </CardContent>
+        </CardFooter>
       </form>
     </Card>
   );
