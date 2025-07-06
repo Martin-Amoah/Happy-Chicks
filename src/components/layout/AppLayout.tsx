@@ -12,6 +12,9 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarRail,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/navigation/SidebarNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -80,12 +83,18 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     <SidebarProvider defaultOpen={true}>
       <SidebarRail />
       <Sidebar variant="sidebar" collapsible="icon" className="border-r">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Menu</SheetTitle>
+          <SheetDescription>
+            Use this menu to navigate through the application.
+          </SheetDescription>
+        </SheetHeader>
         <SidebarHeader className="p-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-primary">
             <path d="M12 2C8.686 2 6 6.477 6 11c0 4.97 2.539 8.261 6 9.5 3.461-1.239 6-4.53 6-9.5C18 6.477 15.314 2 12 2z" />
           </svg>
           <div className="font-headline text-xl font-semibold text-primary group-data-[collapsible=icon]:hidden">
-            CluckTrack
+            Happy Chicks
           </div>
         </SidebarHeader>
         <SidebarContent className="p-2">
@@ -114,13 +123,13 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
       <SidebarInset className="flex flex-col min-h-screen">
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
           <SidebarTrigger className="md:hidden" />
-          <h1 className="font-headline text-lg font-semibold">Welcome to CluckTrack</h1>
+          <h1 className="font-headline text-lg font-semibold">Welcome to Happy Chicks</h1>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
          <footer className="border-t p-4 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} CluckTrack. All rights reserved.
+            © {new Date().getFullYear()} Happy Chicks. All rights reserved.
           </footer>
       </SidebarInset>
     </SidebarProvider>

@@ -49,7 +49,7 @@ export default async function UserManagementPage() {
             <CardTitle className="font-headline flex items-center gap-2">
               <Users className="h-6 w-6 text-primary" /> User Management
             </CardTitle>
-            <CardDescription>Manage users, roles, and permissions within CluckTrack.</CardDescription>
+            <CardDescription>Manage users, roles, and permissions within Happy Chicks.</CardDescription>
           </div>
           {isManager && <AddUserButton />}
         </CardHeader>

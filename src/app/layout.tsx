@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'CluckTrack',
-  description: 'Welcome to CluckTrack Farm Management',
+  title: 'Happy Chicks',
+  description: 'Welcome to Happy Chicks Farm Management',
 };
 
 export default function RootLayout({

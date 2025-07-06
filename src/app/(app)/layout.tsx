@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  title: 'CluckTrack - Farm Management System',
+  title: 'Happy Chicks - Farm Management System',
   description: 'Automated Farm Management System for Happy Chicks',
 };
 

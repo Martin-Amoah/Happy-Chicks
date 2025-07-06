@@ -74,7 +74,7 @@ export default async function SettingsPage() {
                     <CardTitle className="font-headline flex items-center gap-2">
                         <Settings2 className="h-6 w-6 text-primary" /> Application Settings
                     </CardTitle>
-                    <CardDescription>Manage your CluckTrack application preferences and settings.</CardDescription>
+                    <CardDescription>Manage your Happy Chicks application preferences and settings.</CardDescription>
                 </CardHeader>
             </Card>
 

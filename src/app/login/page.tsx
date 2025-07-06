@@ -40,7 +40,7 @@ export default function LoginPage() {
         <div className="flex justify-center mb-4">
           <EggIcon className="h-16 w-16 text-primary" />
         </div>
-        <CardTitle className="text-3xl font-bold font-headline">CluckTrack Login</CardTitle>
+        <CardTitle className="text-3xl font-bold font-headline">Happy Chicks Login</CardTitle>
         <CardDescription>Enter your credentials to access your farm dashboard.</CardDescription>
       </CardHeader>
       <form action={formAction}>
