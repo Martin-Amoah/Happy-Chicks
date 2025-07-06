@@ -9,7 +9,6 @@ import { AddUserButton } from "./add-user-button";
 import { EditUserButton } from "./edit-user-button";
 import { DeleteUserButton } from "./delete-user-button";
 
-<<<<<<< HEAD:src/app/(app)/users/page.tsx
 export default async function UserManagementPage() {
   const supabase = createClient();
   const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -41,14 +40,6 @@ export default async function UserManagementPage() {
       </Card>
     )
   }
-=======
-// Mock data for demonstration
-const userData = [
-  { id: '1', name: 'Manager Alpha', email: 'manager@happychicks.com', role: 'Manager', status: 'Active', lastLogin: '2024-07-21 10:00 AM' },
-  { id: '2', name: 'Worker Bravo', email: 'worker1@happychicks.com', role: 'Worker', status: 'Active', lastLogin: '2024-07-21 08:30 AM' },
-  { id: '3', name: 'Worker Charlie', email: 'worker2@happychicks.com', role: 'Worker', status: 'Inactive', lastLogin: '2024-07-15 09:00 AM' },
-];
->>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3:src/app/users/page.tsx
 
   return (
     <div className="space-y-6">

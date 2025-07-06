@@ -4,13 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-<<<<<<< HEAD
-  title: 'Happy Chicks',
-  description: 'Welcome to Happy Chicks Farm Management',
-=======
   title: 'Happy Chicks - Farm Management System',
   description: 'Automated Farm Management System for Happy Chicks',
->>>>>>> 7375cd47df2a9aece47966c907a348fcbb856bc3
 };
 
 export default function RootLayout({
