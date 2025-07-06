@@ -54,11 +54,27 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     router.refresh();
   };
 
-  const getInitials = (email?: string) => {
-    if (!email) return "U";
-    const namePart = email.split('@')[0];
-    return namePart ? namePart[0].toUpperCase() : "U";
+  const getInitials = (user?: User) => {
+    if (!user) return "U";
+    
+    // Prefer full_name from user_metadata for initials
+    const fullName = user.user_metadata?.full_name;
+    if (fullName && typeof fullName === 'string') {
+        const names = fullName.split(' ').filter(Boolean); // Filter out empty strings
+        if (names.length > 1) {
+            // Use first letter of first and last name
+            return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+        } else if (names.length === 1 && names[0].length > 1) {
+             // Use first two letters of single name
+            return names[0].substring(0, 2).toUpperCase();
+        }
+    }
+    
+    // Fallback to the first letter of the email
+    return user.email ? user.email[0].toUpperCase() : "U";
   };
+  
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || "User";
   
   return (
     <SidebarProvider defaultOpen={true}>
@@ -79,11 +95,11 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
         <SidebarFooter className="p-4 flex flex-col gap-2">
           <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
              <Avatar className="h-9 w-9">
-              <AvatarImage src="https://placehold.co/40x40.png" alt="User Avatar" data-ai-hint="person face" />
-              <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+              <AvatarImage src={user.user_metadata?.avatar_url} alt="User Avatar" />
+              <AvatarFallback>{getInitials(user)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="text-sm font-medium text-sidebar-foreground">{user.email?.split('@')[0]}</span>
+              <span className="text-sm font-medium text-sidebar-foreground">{displayName}</span>
               <span className="text-xs text-muted-foreground">{user.email}</span>
             </div>
           </div>
