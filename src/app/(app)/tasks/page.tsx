@@ -11,7 +11,7 @@ import { DeleteTaskButton } from "./delete-task-button";
 export default async function TasksPage() {
   const supabase = createClient();
   
-  // Fetch tasks and the assigned user's name
+  // Step 1: Fetch tasks without the complex join
   const { data: tasks, error: tasksError } = await supabase
     .from('tasks')
     .select(`
@@ -21,19 +21,27 @@ export default async function TasksPage() {
       status,
       created_at,
       notes,
-      profiles (id, full_name)
+      assigned_to_id
     `)
     .order('created_at', { ascending: false });
 
-  // Fetch all users for the assignment dropdown
+  // Step 2: Fetch all users from the 'user_details' view for assignment
   const { data: users, error: usersError } = await supabase
-    .from('profiles')
+    .from('user_details')
     .select('id, full_name');
   
   if (tasksError || usersError) {
-    console.error("Error fetching tasks or users:", tasksError || usersError);
-    // Render an error state
+    console.error("Error fetching data for tasks page:", tasksError || usersError);
   }
+
+  // Step 3: Manually join tasks with user details to create the nested structure expected by components
+  const tasksWithUsers = tasks?.map(task => {
+    const assignedUser = users?.find(user => user.id === task.assigned_to_id);
+    return {
+      ...task,
+      profiles: assignedUser ? { id: assignedUser.id, full_name: assignedUser.full_name } : null
+    };
+  });
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -70,7 +78,7 @@ export default async function TasksPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tasks && tasks.map((task) => {
+              {tasksWithUsers && tasksWithUsers.map((task) => {
                 const badgeStyle = getStatusBadgeVariant(task.status);
                 return (
                   <TableRow key={task.id}>
@@ -86,13 +94,13 @@ export default async function TasksPage() {
                     </TableCell>
                     <TableCell>{new Date(task.created_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right space-x-1">
-                      <EditTaskButton task={task} users={users ?? []} />
+                      <EditTaskButton task={task as any} users={users ?? []} />
                       <DeleteTaskButton taskId={task.id} />
                     </TableCell>
                   </TableRow>
                 )
               })}
-              {(!tasks || tasks.length === 0) && (
+              {(!tasksWithUsers || tasksWithUsers.length === 0) && (
                  <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">No tasks found. Create one above!</TableCell>
                  </TableRow>
