@@ -85,12 +85,6 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     <SidebarProvider defaultOpen={true}>
       <SidebarRail />
       <Sidebar variant="sidebar" collapsible="icon" className="border-r">
-        <SheetHeader className="sr-only">
-          <SheetTitle>Menu</SheetTitle>
-          <SheetDescription>
-            Use this menu to navigate through the application.
-          </SheetDescription>
-        </SheetHeader>
         <SidebarHeader className="p-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-primary">
             <path d="M12 2C8.686 2 6 6.477 6 11c0 4.97 2.539 8.261 6 9.5 3.461-1.239 6-4.53 6-9.5C18 6.477 15.314 2 12 2z" />
