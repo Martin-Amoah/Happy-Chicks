@@ -15,7 +15,7 @@ function SettingsErrorCard({ message, details }: { message: string, details?: st
                 <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
                 <CardDescription>
                     {message}
-                    {details && <p className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">Error details: {details}</p>}
+                    {details && <div className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">Error details: {details}</div>}
                 </CardDescription>
             </CardHeader>
         </Card>
@@ -73,7 +73,7 @@ export default async function SettingsPage() {
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
                         <Settings2 className="h-6 w-6 text-primary" /> Application Settings
-                    </Title>
+                    </CardTitle>
                     <CardDescription>Manage your CluckTrack application preferences and settings.</CardDescription>
                 </CardHeader>
             </Card>
