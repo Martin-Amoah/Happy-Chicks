@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -76,10 +75,10 @@ export function NotificationSettingsForm({ profile }: { profile: Profile }) {
             </Label>
             <Switch id="dailySummary" name="dailySummary" defaultChecked={profile.enable_daily_summary ?? true} />
           </div>
-          <div className="pt-2">
-            <SubmitButton />
-          </div>
         </CardContent>
+        <CardFooter>
+            <SubmitButton />
+        </CardFooter>
       </form>
     </Card>
   );

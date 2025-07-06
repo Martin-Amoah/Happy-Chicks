@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,8 +55,10 @@ export function AccountSecurityForm({ email }: { email: string }) {
               <Input id="password" name="password" type="password" placeholder="New Password" />
               {state.errors?.password && <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>}
             </div>
-            <SubmitButton />
           </CardContent>
+          <CardFooter>
+            <SubmitButton />
+          </CardFooter>
        </form>
     </Card>
   );
