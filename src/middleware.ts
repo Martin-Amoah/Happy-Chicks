@@ -1,12 +1,14 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+
+import { type NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import type { CookieOptions } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,60 +16,73 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value
+          return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
+          // If the cookie is set, update the request's cookies.
           request.cookies.set({
             name,
             value,
             ...options,
-          })
+          });
+          // Also update the response's cookies.
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
-          })
+          });
           response.cookies.set({
             name,
             value,
             ...options,
-          })
+          });
         },
         remove(name: string, options: CookieOptions) {
+          // If the cookie is removed, update the request's cookies.
           request.cookies.set({
             name,
             value: '',
             ...options,
-          })
+          });
+          // Also update the response's cookies.
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
-          })
+          });
           response.cookies.set({
             name,
             value: '',
             ...options,
-          })
+          });
         },
       },
     }
-  )
+  );
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const { pathname } = request.nextUrl
+  // This will refresh the session if it's expired.
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // If user is not logged in, redirect to login page.
-  if (!user && pathname !== '/login') {
-    return NextResponse.redirect(new URL('/login', request.url))
+  const { pathname } = request.nextUrl;
+
+  // Define public routes that don't require authentication.
+  const publicRoutes = ['/login'];
+
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  // If the user is not authenticated and is trying to access a protected route,
+  // redirect them to the login page.
+  if (!user && !isPublicRoute) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If user is logged in, redirect to dashboard from login or root page.
-  if (user && (pathname === '/login' || pathname === '/')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+  // If the user is authenticated and is trying to access the login page,
+  // or the root page, redirect them to the dashboard.
+  if (user && (isPublicRoute || pathname === '/')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  return response
+  return response;
 }
 
 export const config = {
@@ -77,7 +92,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - api/ (API routes)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
-}
+};
