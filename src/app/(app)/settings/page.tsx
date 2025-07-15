@@ -54,7 +54,7 @@ export default async function SettingsPage() {
     }
     const farmConfig = farmConfigResponse.data;
     
-    const isManager = profile.role === 'Manager';
+    const isManager = profile?.role === 'Manager';
 
     return (
         <div className="space-y-6">
