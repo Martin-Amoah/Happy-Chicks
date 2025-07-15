@@ -20,8 +20,12 @@ export default async function AuthenticatedAppLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    // This should not happen because of middleware, but as a safeguard
-    redirect('/login');
+    return redirect('/login');
+  }
+
+  const { pathname } = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002');
+  if (user && (pathname === '/login' || pathname === '/')) {
+      return redirect('/dashboard');
   }
 
   return (
