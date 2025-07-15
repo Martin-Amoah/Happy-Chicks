@@ -10,8 +10,14 @@ import { DeleteFeedStockButton, DeleteFeedAllocationButton } from "./delete-butt
 
 export default async function InventoryPage() {
   const supabase = createClient();
-  const { data: feedStock, error: stockError } = await supabase.from('feed_stock').select('*').order('date', { ascending: false });
-  const { data: feedAllocations, error: allocationError } = await supabase.from('feed_allocations').select('*').order('date', { ascending: false });
+  
+  const [stockResponse, allocationResponse] = await Promise.all([
+    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
+    supabase.from('feed_allocations').select('*').order('date', { ascending: false })
+  ]);
+
+  const { data: feedStock, error: stockError } = stockResponse;
+  const { data: feedAllocations, error: allocationError } = allocationResponse;
 
   if (stockError) console.error("Supabase stock fetch error:", stockError.message);
   if (allocationError) console.error("Supabase allocation fetch error:", allocationError.message);

@@ -31,12 +31,10 @@ export default async function SettingsPage() {
         return redirect('/login');
     }
 
-    // Step 1: Fetch user profile
-    const profileResponse = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+    const [profileResponse, farmConfigResponse] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('farm_config').select('*').eq('id', 1).single() // Assuming a single config row with id 1
+    ]);
     
     if (profileResponse.error) {
         console.error("Supabase profile error:", profileResponse.error.message);
@@ -47,13 +45,6 @@ export default async function SettingsPage() {
     }
     const profile = profileResponse.data;
 
-    // Step 2: Fetch farm configuration
-    const farmConfigResponse = await supabase
-        .from('farm_config')
-        .select('*')
-        .eq('id', 1) // Assuming a single config row with id 1
-        .single();
-
     if (farmConfigResponse.error) {
         console.error("Supabase farm config error:", farmConfigResponse.error.message);
         return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigResponse.error.message} />;
@@ -63,10 +54,8 @@ export default async function SettingsPage() {
     }
     const farmConfig = farmConfigResponse.data;
     
-    // Step 3: Determine user role
     const isManager = profile.role === 'Manager';
 
-    // Step 4: Render the page
     return (
         <div className="space-y-6">
             <Card>

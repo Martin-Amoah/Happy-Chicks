@@ -11,18 +11,16 @@ import { DeleteUserButton } from "./delete-user-button";
 
 export default async function UserManagementPage() {
   const supabase = createClient();
+  
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  const { data: users, error } = await supabase
-    .from('user_details')
-    .select('*')
-    .order('email');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', currentUser?.id!)
-    .single();
+  const [usersResponse, profileResponse] = await Promise.all([
+      supabase.from('user_details').select('*').order('email'),
+      currentUser ? supabase.from('profiles').select('role').eq('id', currentUser.id).single() : Promise.resolve({ data: null, error: null })
+  ]);
+  
+  const { data: users, error } = usersResponse;
+  const { data: profile } = profileResponse;
     
   const isManager = profile?.role === 'Manager';
 
