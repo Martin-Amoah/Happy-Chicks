@@ -31,26 +31,28 @@ export default async function SettingsPage() {
         return redirect('/login');
     }
 
-    const [profileResponse, farmConfigResponse] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).limit(1).single(),
-        supabase.from('farm_config').select('*').eq('id', 1).limit(1).single() // Assuming a single config row with id 1
-    ]);
+    const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
     
-    // Non-fatal errors (like row not found) are handled below by checking the data.
-    // We only need to catch actual database connection errors here.
-    if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
-        console.error("Supabase profile error:", profileResponse.error.message);
-        return <SettingsErrorCard message="Could not load your user profile from the database." details={profileResponse.error.message} />;
+    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 means no rows found, which we handle
+        console.error("Supabase profile error:", profileError.message);
+        return <SettingsErrorCard message="Could not load your user profile from the database." details={profileError.message} />;
     }
     
-    if (farmConfigResponse.error && farmConfigResponse.error.code !== 'PGRST116') {
-        console.error("Supabase farm config error:", farmConfigResponse.error.message);
-        return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigResponse.error.message} />;
+    const { data: farmConfig, error: farmConfigError } = await supabase
+        .from('farm_config')
+        .select('*')
+        .eq('id', 1) // Assuming a single config row with id 1
+        .single();
+
+    if (farmConfigError && farmConfigError.code !== 'PGRST116') {
+        console.error("Supabase farm config error:", farmConfigError.message);
+        return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigError.message} />;
     }
 
-    const profile = profileResponse.data;
-    const farmConfig = farmConfigResponse.data;
-    
     // Check if the user has the manager role. This is safe even if profile is null.
     const isManager = profile?.role === 'Manager';
 
