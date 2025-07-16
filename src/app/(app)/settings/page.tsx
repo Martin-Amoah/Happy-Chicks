@@ -1,6 +1,6 @@
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings2 } from "lucide-react";
+import { Settings2, CircleAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from 'next/navigation';
 import { NotificationSettingsForm } from "./notification-settings-form";
@@ -10,12 +10,12 @@ import { FarmConfigurationForm } from "./farm-configuration-form";
 // A dedicated error component to avoid repeating JSX
 function SettingsErrorCard({ message, details }: { message: string, details?: string }) {
     return (
-        <Card>
+        <Card className="border-destructive">
             <CardHeader>
-                <CardTitle className="text-destructive">Error Loading Settings</CardTitle>
+                <CardTitle className="text-destructive flex items-center gap-2"><CircleAlert /> Error Loading Settings</CardTitle>
                 <CardDescription>
                     {message}
-                    {details && <div className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">Error details: {details}</div>}
+                    {details && <div className="mt-2 text-xs text-muted-foreground bg-destructive p-2 rounded-md">Error details: {details}</div>}
                 </CardDescription>
             </CardHeader>
         </Card>
@@ -27,20 +27,23 @@ export default async function SettingsPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
+        // This redirect should be handled by the layout, but as a safeguard:
         return redirect('/login');
     }
 
     const [profileResponse, farmConfigResponse] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('farm_config').select('*').eq('id', 1).single() // Assuming a single config row with id 1
+        supabase.from('profiles').select('*').eq('id', user.id).limit(1).single(),
+        supabase.from('farm_config').select('*').eq('id', 1).limit(1).single() // Assuming a single config row with id 1
     ]);
     
-    if (profileResponse.error && profileResponse.error.code !== 'PGRST116') { // Ignore 'exact one row' error if no profile exists
+    // Non-fatal errors (like row not found) are handled below by checking the data.
+    // We only need to catch actual database connection errors here.
+    if (profileResponse.error && profileResponse.error.code !== 'PGRST116') {
         console.error("Supabase profile error:", profileResponse.error.message);
         return <SettingsErrorCard message="Could not load your user profile from the database." details={profileResponse.error.message} />;
     }
     
-    if (farmConfigResponse.error && farmConfigResponse.error.code !== 'PGRST116') { // Ignore 'exact one row' error if no config exists
+    if (farmConfigResponse.error && farmConfigResponse.error.code !== 'PGRST116') {
         console.error("Supabase farm config error:", farmConfigResponse.error.message);
         return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigResponse.error.message} />;
     }
@@ -48,6 +51,7 @@ export default async function SettingsPage() {
     const profile = profileResponse.data;
     const farmConfig = farmConfigResponse.data;
     
+    // Check if the user has the manager role. This is safe even if profile is null.
     const isManager = profile?.role === 'Manager';
 
     return (
@@ -74,7 +78,7 @@ export default async function SettingsPage() {
                 farmConfig ? (
                     <FarmConfigurationForm config={farmConfig} />
                 ) : (
-                     <SettingsErrorCard message="Farm configuration is unavailable." details="No configuration data found in the database." />
+                     <SettingsErrorCard message="Farm configuration is unavailable." details="No configuration data found in the database. A manager may need to set this up." />
                 )
             )}
         </div>
