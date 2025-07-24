@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -12,7 +13,7 @@ import { LayoutDashboard, FileText, Settings2, Users, ListChecks, ShoppingCart }
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Inventory", icon: FeedIcon },
-  { href: "/egg-production", label: "Egg Production", icon: EggIcon },
+  { href: "/egg-collection", label: "Egg Collection", icon: EggIcon },
   { href: "/mortality", label: "Mortality Tracking", icon: BirdIcon },
   { href: "/tasks", label: "Task Management", icon: ListChecks },
   { href: "/sales", label: "Sales Tracking", icon: ShoppingCart },
