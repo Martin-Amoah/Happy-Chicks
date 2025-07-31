@@ -8,41 +8,41 @@ body {
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Almost White Blue */
-    --foreground: 215 28% 17%; /* Dark Slate Gray */
+    --background: 48 100% 98%; /* Pale Cream */
+    --foreground: 220 30% 25%; /* Dark Blue/Navy */
     --card: 0 0% 100%; /* White */
-    --card-foreground: 215 28% 17%; /* Dark Slate Gray */
+    --card-foreground: 220 30% 25%; /* Dark Blue/Navy */
     --popover: 0 0% 100%; /* White */
-    --popover-foreground: 215 28% 17%; /* Dark Slate Gray */
-    --primary: 221 83% 53%; /* Strong Blue */
-    --primary-foreground: 210 40% 98%; /* Almost White Blue */
-    --secondary: 210 40% 96.1%; /* Light Grayish Blue */
-    --secondary-foreground: 222 47% 11.2%; /* Dark Blue */
-    --muted: 210 40% 96.1%; /* Light Grayish Blue */
-    --muted-foreground: 215 20% 45%; /* Medium Slate Gray */
-    --accent: 210 40% 96.1%; /* Light Grayish Blue */
-    --accent-foreground: 222 47% 11.2%; /* Dark Blue */
-    --destructive: 0 84% 60%; /* Bright Red */
-    --destructive-foreground: 210 40% 98%; /* Almost White Blue */
-    --border: 214 32% 91%; /* Light Slate Border */
-    --input: 214 32% 91%; /* Light Slate Border */
-    --ring: 221 83% 53%; /* Strong Blue */
-    --chart-1: 221 83% 53%; /* Strong Blue */
-    --chart-2: 168 76% 42%; /* Sea Green */
-    --chart-3: 38 92% 56%; /* Bright Orange */
+    --popover-foreground: 220 30% 25%; /* Dark Blue/Navy */
+    --primary: 48 96% 58%; /* Bright Yellow */
+    --primary-foreground: 220 30% 20%; /* Darker Navy for contrast on yellow */
+    --secondary: 48 100% 90%; /* Light Yellow */
+    --secondary-foreground: 220 30% 25%; /* Dark Blue/Navy */
+    --muted: 48 100% 94%; /* Lighter Yellow/Cream */
+    --muted-foreground: 220 20% 45%; /* Muted Navy */
+    --accent: 30 96% 60%; /* Orange */
+    --accent-foreground: 0 0% 100%; /* White */
+    --destructive: 350 78% 55%; /* Pink/Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+    --border: 48 30% 88%; /* Light Yellow/Cream border */
+    --input: 48 30% 92%; /* Lighter Yellow/Cream input */
+    --ring: 48 96% 58%; /* Bright Yellow */
+    --chart-1: 48 96% 58%; /* Bright Yellow */
+    --chart-2: 30 96% 60%; /* Orange */
+    --chart-3: 190 80% 55%; /* A complementary blue */
     --chart-4: 288 76% 52%; /* Purple */
-    --chart-5: 0 84% 60%; /* Bright Red */
+    --chart-5: 350 78% 55%; /* Pink/Red */
     --radius: 0.5rem;
 
     /* Sidebar specific theme */
-    --sidebar-background: 220 15% 15%; /* Dark Slate for Sidebar */
-    --sidebar-foreground: 210 40% 98%; /* Almost White Blue Text */
-    --sidebar-primary: 221 83% 53%; /* Strong Blue for active */
-    --sidebar-primary-foreground: 210 40% 98%; /* White text on active */
-    --sidebar-accent: 220 15% 25%; /* Lighter Slate for hover */
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 15% 25%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-background: 220 30% 22%; /* Dark Navy for Sidebar */
+    --sidebar-foreground: 48 100% 95%; /* Pale Cream Text */
+    --sidebar-primary: 48 96% 58%; /* Bright Yellow for active */
+    --sidebar-primary-foreground: 220 30% 20%; /* Dark text on active */
+    --sidebar-accent: 220 30% 30%; /* Lighter Navy for hover */
+    --sidebar-accent-foreground: 48 100% 95%;
+    --sidebar-border: 220 30% 30%;
+    --sidebar-ring: 48 96% 58%;
   }
 
   .dark {
