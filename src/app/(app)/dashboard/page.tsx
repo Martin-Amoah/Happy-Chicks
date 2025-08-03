@@ -23,19 +23,17 @@ async function getDashboardData() {
     eggCollectionData,
     mortalityData,
     feedAllocationData,
-    feedStockData,
-    farmConfigData
+    feedStockData
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sixWeeksAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sixMonthsAgo, 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
-    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
-    supabase.from('farm_config').select('initial_bird_count').single()
+    supabase.from('feed_stock').select('*').order('date', { ascending: false })
   ]);
 
-  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || farmConfigData.error) {
+  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error) {
     console.error("Dashboard data fetch error:", 
-      eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message || farmConfigData.error?.message
+      eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message
     );
     // Return empty/default data to prevent crash
     return {
@@ -64,7 +62,7 @@ async function getDashboardData() {
   const mortalities = mortalityData.data || [];
   const allocations = feedAllocationData.data || [];
   const stocks = feedStockData.data || [];
-  const BIRD_START_COUNT = farmConfigData.data?.initial_bird_count ?? 0;
+  const BIRD_START_COUNT = 500; // Hardcoded fallback value
 
   // --- KPI Calculations ---
   const todayStr = format(today, 'yyyy-MM-dd');
