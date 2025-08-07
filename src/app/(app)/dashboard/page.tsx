@@ -4,9 +4,7 @@ import {
   subDays, 
   startOfToday, 
   format, 
-  eachWeekOfInterval, 
-  startOfWeek,
-  endOfWeek,
+  eachDayOfInterval,
   eachMonthOfInterval,
   endOfMonth,
   subMonths
@@ -16,7 +14,7 @@ import { DashboardClientContent } from './client'; // Import the new client comp
 async function getDashboardData() {
   const supabase = createClient();
   const today = startOfToday();
-  const sixWeeksAgo = subDays(today, 42);
+  const sevenDaysAgo = subDays(today, 6); // For a 7-day trend including today
   const sixMonthsAgo = subMonths(today, 6);
 
   const [
@@ -26,7 +24,7 @@ async function getDashboardData() {
     feedStockData,
     farmConfigData,
   ] = await Promise.all([
-    supabase.from('egg_collections').select('*').gte('date', format(sixWeeksAgo, 'yyyy-MM-dd')),
+    supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(subDays(today, 60), 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
@@ -35,34 +33,31 @@ async function getDashboardData() {
 
   const farmConfig = farmConfigData.data;
 
-  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || farmConfigData.error) {
-    // Note: PGRST116 means no rows found, which is not a critical error for farm_config.
-    if(farmConfigData.error && farmConfigData.error.code !== 'PGRST116') {
-        console.error("Dashboard data fetch error:", 
-        eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message || farmConfigData.error?.message
-        );
-        // Return empty/default data to prevent crash
-        return {
-        kpis: {
-            totalEggsToday: 'N/A',
-            feedConsumption: 'N/A',
-            mortalityRate: 'N/A',
-            activeBirds: 'N/A',
-            brokenEggs: 'N/A',
-            feedInventory: 'N/A',
-            eggCollectionTrend: 'N/A',
-            feedConsumptionTrend: 'N/A',
-            mortalityRateTrend: 'N/A',
-            brokenEggsTrend: 'N/A'
-        },
-        charts: {
-            eggCollectionTrend: [],
-            feedConsumptionAnalysis: [],
-            mortalityRateTrend: []
-        },
-        activityLog: []
-        };
-    }
+  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || (farmConfigData.error && farmConfigData.error.code !== 'PGRST116')) {
+    console.error("Dashboard data fetch error:", 
+      eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message || farmConfigData.error?.message
+    );
+    // Return empty/default data to prevent crash
+    return {
+      kpis: {
+        totalEggsToday: 'N/A',
+        feedConsumption: 'N/A',
+        mortalityRate: 'N/A',
+        activeBirds: 'N/A',
+        brokenEggs: 'N/A',
+        feedInventory: 'N/A',
+        eggCollectionTrend: 'N/A',
+        feedConsumptionTrend: 'N/A',
+        mortalityRateTrend: 'N/A',
+        brokenEggsTrend: 'N/A'
+      },
+      charts: {
+        eggCollectionTrend: [],
+        feedConsumptionAnalysis: [],
+        mortalityRateTrend: []
+      },
+      activityLog: []
+    };
   }
 
   const eggs = eggCollectionData.data || [];
@@ -95,12 +90,12 @@ async function getDashboardData() {
   const feedConsumptionTrend = feedConsumptionToday - feedConsumptionYesterday;
 
   const mortalityLast30Days = mortalities
-    .filter(m => new Date(m.date) >= subDays(today, 30))
+    .filter(m => new Date(m.date + 'T00:00:00') >= subDays(today, 30))
     .reduce((acc, curr) => acc + curr.count, 0);
 
   const mortalityPrevious30Days = mortalities
     .filter(m => {
-        const date = new Date(m.date);
+        const date = new Date(m.date + 'T00:00:00');
         return date >= subDays(today, 60) && date < subDays(today, 30);
     })
     .reduce((acc, curr) => acc + curr.count, 0);
@@ -120,13 +115,13 @@ async function getDashboardData() {
   const feedInventory = totalStock - totalAllocated;
 
   // --- Chart Data ---
-  const weeklyEggData = eachWeekOfInterval({ start: sixWeeksAgo, end: today })
-    .map((weekStart, i) => {
-      const weekEnd = endOfWeek(weekStart);
-      const weeklyEggs = eggs
-        .filter(e => new Date(e.date + 'T00:00:00') >= weekStart && new Date(e.date + 'T00:00:00') <= weekEnd)
+  const dailyEggData = eachDayOfInterval({ start: sevenDaysAgo, end: today })
+    .map(day => {
+      const formattedDay = format(day, 'yyyy-MM-dd');
+      const dailyEggs = eggs
+        .filter(e => e.date === formattedDay)
         .reduce((sum, e) => sum + e.total_eggs, 0);
-      return { date: `W${i + 1}`, value: weeklyEggs };
+      return { date: format(day, 'dd/MM'), value: dailyEggs };
     });
 
   const feedByShed = allocations.reduce((acc, curr) => {
@@ -166,12 +161,12 @@ async function getDashboardData() {
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
       eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
-      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
+      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : '-'}${Math.abs(feedConsumptionTrend)}kg from yesterday`,
       mortalityRateTrend: `${mortalityCountTrend >= 0 ? '+' : ''}${mortalityCountTrend} from last 30 days`,
-      brokenEggsTrend: `${brokenEggsTrend >= 0 ? '+' : ''}${brokenEggsTrend} from yesterday`
+      brokenEggsTrend: `${brokenEggsTrend <= 0 ? '' : '+'}${brokenEggsTrend} from yesterday`
     },
     charts: {
-      eggCollectionTrend: weeklyEggData,
+      eggCollectionTrend: dailyEggData,
       feedConsumptionAnalysis,
       mortalityRateTrend: monthlyMortalityData
     },

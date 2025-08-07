@@ -92,7 +92,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
         <SampleLineChart
           title="Egg Collection Trend"
-          description="Total eggs collected over the last 6 weeks."
+          description="Total eggs collected over the last 7 days."
           data={charts.eggCollectionTrend}
           dataKeys={{x: "date", y: "value"}}
           config={{ value: { label: "Total Eggs", color: "hsl(var(--chart-1))" } }}
