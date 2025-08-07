@@ -112,7 +112,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
          <SampleLineChart
           title="Mortality Trend"
-          description="Total mortalities recorded over the last 30 days."
+          description="Total mortalities recorded over the last 7 days."
           data={charts.mortalityRateTrend}
           dataKeys={{x: "date", y: "value"}}
           config={{ value: { label: "Mortalities", color: "hsl(var(--chart-5))" } }}

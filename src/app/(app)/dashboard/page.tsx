@@ -12,7 +12,6 @@ async function getDashboardData() {
   const supabase = createClient();
   const today = startOfToday();
   const sevenDaysAgo = subDays(today, 6);
-  const thirtyDaysAgo = subDays(today, 29);
 
   const [
     eggCollectionData,
@@ -22,7 +21,7 @@ async function getDashboardData() {
     farmConfigData,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
-    supabase.from('mortality_records').select('*').gte('date', format(subDays(today, 60), 'yyyy-MM-dd')),
+    supabase.from('mortality_records').select('*').gte('date', format(subDays(today, 13), 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single()
@@ -67,8 +66,8 @@ async function getDashboardData() {
   const todayStr = format(today, 'yyyy-MM-dd');
   const yesterdayStr = format(subDays(today, 1), 'yyyy-MM-dd');
   
-  const totalMortality = mortalities.reduce((acc, curr) => acc + curr.count, 0);
-  const activeBirds = BIRD_START_COUNT - totalMortality;
+  const totalMortalityAllTime = mortalities.reduce((acc, curr) => acc + curr.count, 0);
+  const activeBirds = BIRD_START_COUNT - totalMortalityAllTime;
 
   const eggsToday = eggs.filter(e => e.date === todayStr);
   const eggsYesterday = eggs.filter(e => e.date === yesterdayStr);
@@ -87,13 +86,13 @@ async function getDashboardData() {
   const feedConsumptionTrend = feedConsumptionToday - feedConsumptionYesterday;
 
   const mortalityLast7Days = mortalities
-    .filter(m => new Date(m.date + 'T00:00:00') >= subDays(today, 7))
+    .filter(m => new Date(m.date + 'T00:00:00') >= sevenDaysAgo)
     .reduce((acc, curr) => acc + curr.count, 0);
 
   const mortalityPrevious7Days = mortalities
     .filter(m => {
         const date = new Date(m.date + 'T00:00:00');
-        return date >= subDays(today, 14) && date < subDays(today, 7);
+        return date >= subDays(today, 13) && date < sevenDaysAgo;
     })
     .reduce((acc, curr) => acc + curr.count, 0);
     
@@ -130,7 +129,7 @@ async function getDashboardData() {
     current: total
   }));
 
-  const dailyMortalityData = eachDayOfInterval({ start: thirtyDaysAgo, end: today })
+  const dailyMortalityData = eachDayOfInterval({ start: sevenDaysAgo, end: today })
     .map(day => {
         const formattedDay = format(day, 'yyyy-MM-dd');
         const dailyDeaths = mortalities
@@ -141,7 +140,10 @@ async function getDashboardData() {
 
   // --- Activity Log ---
   const latestAllocations = allocations.slice(0, 3).map(a => ({ type: 'feed_allocation', date: a.date, data: a }));
-  const latestMortality = mortalities.slice(0, 3).map(m => ({ type: 'mortality', date: m.date, data: m }));
+  const latestMortality = mortalities
+    .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3)
+    .map(m => ({ type: 'mortality', date: m.date, data: m }));
   const latestStock = stocks.slice(0, 3).map(s => ({ type: 'feed_stock', date: s.date, data: s }));
   
   const allActivities = [...latestAllocations, ...latestMortality, ...latestStock]
@@ -158,8 +160,8 @@ async function getDashboardData() {
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
       eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
-      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
-      mortalityRateTrend: `${mortalityCountTrend >= 0 ? '+' : ''}${mortalityCountTrend} from last 7 days`,
+      feedConsumptionTrend: `${feedConsumptionTrend <= 0 ? '' : '+'}${feedConsumptionTrend}kg from yesterday`,
+      mortalityRateTrend: `${mortalityCountTrend <= 0 ? '' : '+'}${mortalityCountTrend} from last 7 days`,
       brokenEggsTrend: `${brokenEggsTrend <= 0 ? '' : '+'}${brokenEggsTrend} from yesterday`
     },
     charts: {
