@@ -21,7 +21,7 @@ async function getDashboardData() {
     farmConfigData,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
-    supabase.from('mortality_records').select('*').gte('date', format(subDays(today, 13), 'yyyy-MM-dd')),
+    supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single()
@@ -68,8 +68,8 @@ async function getDashboardData() {
   
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
 
-  const feedToday = allocations.filter(a => a.date === todayStr);
-  const feedConsumptionToday = feedToday.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
+  const feedTodayInBags = allocations.filter(a => a.date === todayStr && a.unit === 'bags');
+  const feedConsumptionToday = feedTodayInBags.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
 
   const mortalityLast7Days = mortalities
     .filter(m => new Date(m.date + 'T00:00:00') >= sevenDaysAgo)
@@ -129,7 +129,7 @@ async function getDashboardData() {
   return {
     kpis: {
       totalEggsToday: `${totalEggsToday} Eggs`,
-      feedConsumption: `${feedConsumptionToday} kg/day`,
+      feedConsumption: `${feedConsumptionToday} bag/day`,
       mortalityRate: mortalityLast7Days,
       activeBirds: activeBirds.toLocaleString(),
       brokenEggs: `${brokenEggsToday}/day`,
