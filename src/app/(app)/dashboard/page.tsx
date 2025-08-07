@@ -43,10 +43,6 @@ async function getDashboardData() {
         activeBirds: 'N/A',
         brokenEggs: 'N/A',
         feedInventory: 'N/A',
-        eggCollectionTrend: 'N/A',
-        feedConsumptionTrend: 'N/A',
-        mortalityRateTrend: 'N/A',
-        brokenEggsTrend: 'N/A'
       },
       charts: {
         eggCollectionTrend: [],
@@ -64,44 +60,23 @@ async function getDashboardData() {
 
   // --- KPI Calculations ---
   const todayStr = format(today, 'yyyy-MM-dd');
-  const yesterdayStr = format(subDays(today, 1), 'yyyy-MM-dd');
   
   const totalMortalityAllTime = mortalities.reduce((acc, curr) => acc + curr.count, 0);
   const activeBirds = BIRD_START_COUNT - totalMortalityAllTime;
 
   const eggsToday = eggs.filter(e => e.date === todayStr);
-  const eggsYesterday = eggs.filter(e => e.date === yesterdayStr);
   
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
-  const totalEggsYesterday = eggsYesterday.reduce((acc, curr) => acc + curr.total_eggs, 0);
-
-  const eggCollectionRate = activeBirds > 0 ? (totalEggsToday / activeBirds) * 100 : 0;
-  const eggCollectionRateYesterday = activeBirds > 0 ? (totalEggsYesterday / activeBirds) * 100 : 0;
-  const eggCollectionTrend = eggCollectionRate - eggCollectionRateYesterday;
 
   const feedToday = allocations.filter(a => a.date === todayStr);
-  const feedYesterday = allocations.filter(a => a.date === yesterdayStr);
   const feedConsumptionToday = feedToday.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
-  const feedConsumptionYesterday = feedYesterday.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
-  const feedConsumptionTrend = feedConsumptionToday - feedConsumptionYesterday;
 
   const mortalityLast7Days = mortalities
     .filter(m => new Date(m.date + 'T00:00:00') >= sevenDaysAgo)
     .reduce((acc, curr) => acc + curr.count, 0);
 
-  const mortalityPrevious7Days = mortalities
-    .filter(m => {
-        const date = new Date(m.date + 'T00:00:00');
-        return date >= subDays(today, 13) && date < sevenDaysAgo;
-    })
-    .reduce((acc, curr) => acc + curr.count, 0);
-    
-  const mortalityCountTrend = mortalityLast7Days - mortalityPrevious7Days;
-
   const brokenEggsToday = eggsToday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
-  const brokenEggsYesterday = eggsYesterday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
-  const brokenEggsTrend = brokenEggsToday - brokenEggsYesterday;
-
+  
   const totalStock = stocks
     .filter(s => s.unit === 'bags')
     .reduce((acc, curr) => acc + curr.quantity, 0);
@@ -159,10 +134,6 @@ async function getDashboardData() {
       activeBirds: activeBirds.toLocaleString(),
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
-      eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
-      feedConsumptionTrend: `${feedConsumptionTrend <= 0 ? '' : '+'}${feedConsumptionTrend}kg from yesterday`,
-      mortalityRateTrend: `${mortalityCountTrend <= 0 ? '' : '+'}${mortalityCountTrend} from last 7 days`,
-      brokenEggsTrend: `${brokenEggsTrend <= 0 ? '' : '+'}${brokenEggsTrend} from yesterday`
     },
     charts: {
       eggCollectionTrend: dailyEggData,
