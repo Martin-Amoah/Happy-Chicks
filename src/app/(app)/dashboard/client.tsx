@@ -58,10 +58,10 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           trendColor={kpis.feedConsumptionTrend.startsWith('-') ? 'text-green-600' : 'text-red-600'}
         />
         <KpiCard
-          title="Mortality Rate"
+          title="Mortality"
           value={kpis.mortalityRate}
           icon={<BirdIcon className="h-6 w-6 text-destructive" />}
-          description="Average over last 30 days"
+          description="Total over last 30 days"
           trend={kpis.mortalityRateTrend}
           trendColor={kpis.mortalityRateTrend.startsWith('+') ? 'text-red-600' : 'text-green-600'}
         />
