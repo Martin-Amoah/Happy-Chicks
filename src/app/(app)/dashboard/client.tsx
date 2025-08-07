@@ -55,15 +55,15 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           icon={<FeedIcon className="h-6 w-6 text-accent" />}
           description="Total daily feed usage"
           trend={kpis.feedConsumptionTrend}
-          trendColor={kpis.feedConsumptionTrend.startsWith('+') ? 'text-green-600' : 'text-red-600'}
+          trendColor={kpis.feedConsumptionTrend.startsWith('-') ? 'text-red-600' : 'text-green-600'}
         />
         <KpiCard
           title="Mortality"
           value={kpis.mortalityRate}
           icon={<BirdIcon className="h-6 w-6 text-destructive" />}
-          description="Total over last 30 days"
+          description="Total over last 7 days"
           trend={kpis.mortalityRateTrend}
-          trendColor={kpis.mortalityRateTrend.startsWith('+') ? 'text-red-600' : 'text-green-600'}
+          trendColor={kpis.mortalityRateTrend.startsWith('-') ? 'text-green-600' : 'text-red-600'}
         />
         <KpiCard
           title="Active Birds"
@@ -77,7 +77,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           icon={<EggIcon className="h-6 w-6 text-destructive" />}
           description="Daily broken eggs"
           trend={kpis.brokenEggsTrend}
-          trendColor={kpis.brokenEggsTrend.startsWith('+') ? 'text-red-600' : 'text-green-600'}
+          trendColor={kpis.brokenEggsTrend.startsWith('-') ? 'text-green-600' : 'text-red-600'}
         />
          <KpiCard
           title="Feed Inventory"

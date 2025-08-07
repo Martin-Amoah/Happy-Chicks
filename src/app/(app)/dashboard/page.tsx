@@ -86,18 +86,18 @@ async function getDashboardData() {
   const feedConsumptionYesterday = feedYesterday.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
   const feedConsumptionTrend = feedConsumptionToday - feedConsumptionYesterday;
 
-  const mortalityLast30Days = mortalities
-    .filter(m => new Date(m.date + 'T00:00:00') >= subDays(today, 30))
+  const mortalityLast7Days = mortalities
+    .filter(m => new Date(m.date + 'T00:00:00') >= subDays(today, 7))
     .reduce((acc, curr) => acc + curr.count, 0);
 
-  const mortalityPrevious30Days = mortalities
+  const mortalityPrevious7Days = mortalities
     .filter(m => {
         const date = new Date(m.date + 'T00:00:00');
-        return date >= subDays(today, 60) && date < subDays(today, 30);
+        return date >= subDays(today, 14) && date < subDays(today, 7);
     })
     .reduce((acc, curr) => acc + curr.count, 0);
     
-  const mortalityCountTrend = mortalityLast30Days - mortalityPrevious30Days;
+  const mortalityCountTrend = mortalityLast7Days - mortalityPrevious7Days;
 
   const brokenEggsToday = eggsToday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
   const brokenEggsYesterday = eggsYesterday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
@@ -153,13 +153,13 @@ async function getDashboardData() {
     kpis: {
       totalEggsToday: `${totalEggsToday} Eggs`,
       feedConsumption: `${feedConsumptionToday} kg/day`,
-      mortalityRate: mortalityLast30Days,
+      mortalityRate: mortalityLast7Days,
       activeBirds: activeBirds.toLocaleString(),
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
       eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
       feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
-      mortalityRateTrend: `${mortalityCountTrend >= 0 ? '+' : ''}${mortalityCountTrend} from last 30 days`,
+      mortalityRateTrend: `${mortalityCountTrend >= 0 ? '+' : ''}${mortalityCountTrend} from last 7 days`,
       brokenEggsTrend: `${brokenEggsTrend <= 0 ? '' : '+'}${brokenEggsTrend} from yesterday`
     },
     charts: {
