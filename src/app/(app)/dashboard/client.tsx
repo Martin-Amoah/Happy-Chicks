@@ -55,7 +55,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           icon={<FeedIcon className="h-6 w-6 text-accent" />}
           description="Total daily feed usage"
           trend={kpis.feedConsumptionTrend}
-          trendColor={kpis.feedConsumptionTrend.startsWith('-') ? 'text-green-600' : 'text-red-600'}
+          trendColor={kpis.feedConsumptionTrend.startsWith('+') ? 'text-green-600' : 'text-red-600'}
         />
         <KpiCard
           title="Mortality"
@@ -77,7 +77,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           icon={<EggIcon className="h-6 w-6 text-destructive" />}
           description="Daily broken eggs"
           trend={kpis.brokenEggsTrend}
-          trendColor={kpis.brokenEggsTrend.startsWith('-') ? 'text-green-600' : 'text-red-600'}
+          trendColor={kpis.brokenEggsTrend.startsWith('+') ? 'text-red-600' : 'text-green-600'}
         />
          <KpiCard
           title="Feed Inventory"
@@ -112,7 +112,7 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
          <SampleLineChart
           title="Mortality Trend"
-          description="Total mortalities recorded over the last 6 months."
+          description="Total mortalities recorded over the last 30 days."
           data={charts.mortalityRateTrend}
           dataKeys={{x: "date", y: "value"}}
           config={{ value: { label: "Mortalities", color: "hsl(var(--chart-5))" } }}

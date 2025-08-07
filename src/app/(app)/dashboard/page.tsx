@@ -4,18 +4,15 @@ import {
   subDays, 
   startOfToday, 
   format, 
-  eachDayOfInterval,
-  eachMonthOfInterval,
-  endOfMonth,
-  subMonths
+  eachDayOfInterval
 } from 'date-fns';
 import { DashboardClientContent } from './client'; // Import the new client component
 
 async function getDashboardData() {
   const supabase = createClient();
   const today = startOfToday();
-  const sevenDaysAgo = subDays(today, 6); // For a 7-day trend including today
-  const sixMonthsAgo = subMonths(today, 6);
+  const sevenDaysAgo = subDays(today, 6);
+  const thirtyDaysAgo = subDays(today, 29);
 
   const [
     eggCollectionData,
@@ -32,6 +29,7 @@ async function getDashboardData() {
   ]);
 
   const farmConfig = farmConfigData.data;
+  const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
 
   if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || (farmConfigData.error && farmConfigData.error.code !== 'PGRST116')) {
     console.error("Dashboard data fetch error:", 
@@ -64,7 +62,6 @@ async function getDashboardData() {
   const mortalities = mortalityData.data || [];
   const allocations = feedAllocationData.data || [];
   const stocks = feedStockData.data || [];
-  const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
 
   // --- KPI Calculations ---
   const todayStr = format(today, 'yyyy-MM-dd');
@@ -133,13 +130,13 @@ async function getDashboardData() {
     current: total
   }));
 
-  const monthlyMortalityData = eachMonthOfInterval({ start: sixMonthsAgo, end: today })
-    .map(monthStart => {
-        const monthEnd = endOfMonth(monthStart);
-        const monthlyDeaths = mortalities
-            .filter(m => new Date(m.date + 'T00:00:00') >= monthStart && new Date(m.date + 'T00:00:00') <= monthEnd)
+  const dailyMortalityData = eachDayOfInterval({ start: thirtyDaysAgo, end: today })
+    .map(day => {
+        const formattedDay = format(day, 'yyyy-MM-dd');
+        const dailyDeaths = mortalities
+            .filter(m => m.date === formattedDay)
             .reduce((sum, m) => sum + m.count, 0);
-        return { date: format(monthStart, 'MMM'), value: monthlyDeaths };
+        return { date: format(day, 'dd/MM'), value: dailyDeaths };
     });
 
   // --- Activity Log ---
@@ -161,14 +158,14 @@ async function getDashboardData() {
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
       eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
-      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : '-'}${Math.abs(feedConsumptionTrend)}kg from yesterday`,
+      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
       mortalityRateTrend: `${mortalityCountTrend >= 0 ? '+' : ''}${mortalityCountTrend} from last 30 days`,
       brokenEggsTrend: `${brokenEggsTrend <= 0 ? '' : '+'}${brokenEggsTrend} from yesterday`
     },
     charts: {
       eggCollectionTrend: dailyEggData,
       feedConsumptionAnalysis,
-      mortalityRateTrend: monthlyMortalityData
+      mortalityRateTrend: dailyMortalityData
     },
     activityLog: allActivities
   }
