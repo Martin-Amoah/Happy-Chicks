@@ -23,12 +23,14 @@ async function getDashboardData() {
     eggCollectionData,
     mortalityData,
     feedAllocationData,
-    feedStockData
+    feedStockData,
+    farmConfigData,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sixWeeksAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sixMonthsAgo, 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
-    supabase.from('feed_stock').select('*').order('date', { ascending: false })
+    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
+    supabase.from('farm_config').select('*').eq('id', 1).single()
   ]);
 
   if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error) {
@@ -62,7 +64,7 @@ async function getDashboardData() {
   const mortalities = mortalityData.data || [];
   const allocations = feedAllocationData.data || [];
   const stocks = feedStockData.data || [];
-  const BIRD_START_COUNT = 500; // Hardcoded fallback value
+  const BIRD_START_COUNT = farmConfigData.data?.initial_bird_count ?? 0;
 
   // --- KPI Calculations ---
   const todayStr = format(today, 'yyyy-MM-dd');
@@ -95,7 +97,7 @@ async function getDashboardData() {
   const mortalityLastMonth = mortalities
     .filter(m => new Date(m.date) > subDays(today, 60) && new Date(m.date) <= subDays(today, 30))
     .reduce((acc, curr) => acc + curr.count, 0);
-  const mortalityRateLastMonth = activeBirds > 0 && (activeBirds + mortalityLast30Days + mortalityLastMonth) > 0 ? (mortalityLastMonth / (activeBirds + mortalityLast30Days + mortalityLastMonth)) * 100 : 0;
+  const mortalityRateLastMonth = (activeBirds > 0 && (activeBirds + mortalityLast30Days + mortalityLastMonth) > 0) ? (mortalityLastMonth / (activeBirds + mortalityLast30Days + mortalityLastMonth)) * 100 : 0;
   const mortalityRateTrend = mortalityRate - mortalityRateLastMonth;
 
   const brokenEggsToday = eggsToday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
@@ -157,9 +159,9 @@ async function getDashboardData() {
       brokenEggs: `${brokenEggsToday}/day`,
       feedInventory: `${feedInventory} Bags`,
       eggCollectionTrend: `${eggCollectionTrend >= 0 ? '+' : ''}${eggCollectionTrend.toFixed(1)}% from yesterday`,
-      feedConsumptionTrend: `${feedConsumptionTrend >= 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
-      mortalityRateTrend: `${mortalityRateTrend >= 0 ? '+' : ''}${mortalityRateTrend.toFixed(2)}% from last month`,
-      brokenEggsTrend: `${brokenEggsTrend >= 0 ? '+' : ''}${brokenEggsTrend} from yesterday`
+      feedConsumptionTrend: `${feedConsumptionTrend > 0 ? '+' : ''}${feedConsumptionTrend}kg from yesterday`,
+      mortalityRateTrend: `${mortalityRateTrend > 0 ? '+' : ''}${mortalityRateTrend.toFixed(2)}% from last month`,
+      brokenEggsTrend: `${brokenEggsTrend > 0 ? '+' : ''}${brokenEggsTrend} from yesterday`
     },
     charts: {
       eggCollectionTrend: weeklyEggData,
