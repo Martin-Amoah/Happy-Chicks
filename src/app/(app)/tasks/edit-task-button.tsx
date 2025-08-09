@@ -105,6 +105,7 @@ export function EditTaskButton({ task, users, isManager }: EditTaskButtonProps) 
                   <SelectItem value="Blocked">Blocked</SelectItem>
                 </SelectContent>
               </Select>
+               {state.errors?.status && <p className="text-sm font-medium text-destructive">{state.errors.status[0]}</p>}
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <Label htmlFor="notes_edit">Notes (Optional)</Label>
