@@ -22,6 +22,28 @@ function SubmitButton() {
   );
 }
 
+const saleItems = [
+    "Table Eggs (Crates)",
+    "Table Eggs (Dozens)",
+    "Pullets (Young Hens)",
+    "Old Layers (Culled Birds)",
+    "Poultry Manure (Bags)",
+    "Broiler Chicken (Live)",
+    "Broiler Chicken (Dressed)",
+    "Other"
+];
+
+const unitMap: { [key: string]: string } = {
+    "Table Eggs (Crates)": "crates",
+    "Table Eggs (Dozens)": "dozens",
+    "Pullets (Young Hens)": "birds",
+    "Old Layers (Culled Birds)": "birds",
+    "Poultry Manure (Bags)": "bags",
+    "Broiler Chicken (Live)": "birds",
+    "Broiler Chicken (Dressed)": "kg",
+    "Other": ""
+};
+
 export function AddSaleForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -31,6 +53,15 @@ export function AddSaleForm() {
   const [quantity, setQuantity] = useState<number>(0);
   const [unitPrice, setUnitPrice] = useState<number>(0);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [itemSold, setItemSold] = useState<string>('');
+  const [unit, setUnit] = useState<string>('');
+
+
+  useEffect(() => {
+    if (itemSold in unitMap) {
+        setUnit(unitMap[itemSold]);
+    }
+  }, [itemSold]);
 
   useEffect(() => {
     setTotalPrice(quantity * unitPrice);
@@ -48,21 +79,13 @@ export function AddSaleForm() {
       formRef.current?.reset();
       setQuantity(0);
       setUnitPrice(0);
+      setItemSold('');
+      setUnit('');
     }
   }, [state, toast]);
 
   const today = new Date().toISOString().split('T')[0];
-  const saleItems = [
-      "Table Eggs (Crates)",
-      "Table Eggs (Dozens)",
-      "Pullets (Young Hens)",
-      "Old Layers (Culled Birds)",
-      "Poultry Manure (Bags)",
-      "Broiler Chicken (Live)",
-      "Broiler Chicken (Dressed)",
-      "Other"
-  ];
-
+  
   return (
     <Card>
       <CardHeader>
@@ -80,7 +103,7 @@ export function AddSaleForm() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="item_sold">Item Sold</Label>
-            <Select name="item_sold">
+            <Select name="item_sold" value={itemSold} onValueChange={setItemSold}>
               <SelectTrigger id="item_sold">
                 <SelectValue placeholder="Select an item" />
               </SelectTrigger>
@@ -99,7 +122,15 @@ export function AddSaleForm() {
           </div>
            <div className="space-y-1.5">
             <Label htmlFor="unit">Unit</Label>
-            <Input id="unit" name="unit" placeholder="e.g., crates, kg" />
+            <Input 
+              id="unit" 
+              name="unit" 
+              placeholder="e.g., crates, kg"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              readOnly={itemSold !== 'Other'}
+              className={itemSold !== 'Other' ? 'bg-muted/50' : ''}
+            />
             {state.errors?.unit && <p className="text-sm font-medium text-destructive">{state.errors.unit[0]}</p>}
           </div>
           <div className="space-y-1.5">
