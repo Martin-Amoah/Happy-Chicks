@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingCart, PlusCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSale, type FormState } from './actions';
@@ -51,6 +52,16 @@ export function AddSaleForm() {
   }, [state, toast]);
 
   const today = new Date().toISOString().split('T')[0];
+  const saleItems = [
+      "Table Eggs (Crates)",
+      "Table Eggs (Dozens)",
+      "Pullets (Young Hens)",
+      "Old Layers (Culled Birds)",
+      "Poultry Manure (Bags)",
+      "Broiler Chicken (Live)",
+      "Broiler Chicken (Dressed)",
+      "Other"
+  ];
 
   return (
     <Card>
@@ -69,7 +80,16 @@ export function AddSaleForm() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="item_sold">Item Sold</Label>
-            <Input id="item_sold" name="item_sold" placeholder="e.g., Table Eggs (Crates)" />
+            <Select name="item_sold">
+              <SelectTrigger id="item_sold">
+                <SelectValue placeholder="Select an item" />
+              </SelectTrigger>
+              <SelectContent>
+                {saleItems.map((item) => (
+                  <SelectItem key={item} value={item}>{item}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {state.errors?.item_sold && <p className="text-sm font-medium text-destructive">{state.errors.item_sold[0]}</p>}
           </div>
           <div className="space-y-1.5">
