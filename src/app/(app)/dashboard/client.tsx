@@ -54,13 +54,13 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
           description="Total daily feed usage"
         />
         <KpiCard
-          title="Mortality"
+          title="Dead Birds"
           value={kpis.mortalityRate}
           icon={<BirdIcon className="h-6 w-6 text-destructive" />}
           description="Total over last 7 days"
         />
         <KpiCard
-          title="Active Birds"
+          title="Live Birds"
           value={kpis.activeBirds}
           icon={<BirdIcon className="h-6 w-6 text-accent" />}
           description="Total birds currently active"
@@ -103,11 +103,11 @@ export function DashboardClientContent({ kpis, charts, activityLog }: { kpis: an
       </div>
        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
          <SampleLineChart
-          title="Mortality Trend"
-          description="Total mortalities recorded over the last 7 days."
+          title="Dead Birds Trend"
+          description="Total dead birds recorded over the last 7 days."
           data={charts.mortalityRateTrend}
           dataKeys={{x: "date", y: "value"}}
-          config={{ value: { label: "Mortalities", color: "hsl(var(--chart-5))" } }}
+          config={{ value: { label: "Dead Birds", color: "hsl(var(--chart-5))" } }}
           yAxisFormatter={(value) => `${value}`}
           yAxisDomain={[0, 'auto']}
         />
