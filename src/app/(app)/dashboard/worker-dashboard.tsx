@@ -87,8 +87,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                     <TableCell>{task.created_at ? new Date(task.created_at).toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell className="text-right space-x-1">
-                      <EditTaskButton task={task} users={users ?? []} isManager={false} />
-                      <DeleteTaskButton taskId={task.id} />
+                      <span className="text-xs text-muted-foreground">No actions</span>
                     </TableCell>
                   </TableRow>
                 )
