@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { EggIcon } from "@/components/icons/EggIcon";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
@@ -20,17 +19,6 @@ interface WorkerDashboardProps {
 }
 
 export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'Completed': return { variant: 'default', className: 'bg-green-600 text-white' };
-      case 'In Progress': return { variant: 'outline', className: 'border-blue-500 text-blue-600' };
-      case 'Blocked': return { variant: 'destructive', className: '' };
-      case 'Pending':
-      default:
-        return { variant: 'secondary', className: '' };
-    }
-  };
 
   const pendingTasks = tasks.filter(t => t.status !== 'Completed');
 
@@ -85,24 +73,17 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
               <TableRow>
                 <TableHead>Description</TableHead>
                 <TableHead>Due Date</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pendingTasks && pendingTasks.map((task) => {
-                const badgeStyle = getStatusBadgeVariant(task.status);
                 return (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
                     <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
-                    <TableCell>
-                      <Badge variant={badgeStyle.variant as any} className={badgeStyle.className}>
-                        {task.status}
-                      </Badge>
-                    </TableCell>
                     <TableCell className="text-right space-x-1">
                       <EditTaskButton task={task} users={users ?? []} isManager={false} />
                       <DeleteTaskButton taskId={task.id} />
@@ -112,7 +93,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
               })}
               {(!pendingTasks || pendingTasks.length === 0) && (
                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
                  </TableRow>
               )}
             </TableBody>
