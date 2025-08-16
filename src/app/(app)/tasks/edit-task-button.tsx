@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useActionState, useEffect, useState } from 'react';
@@ -45,9 +46,6 @@ export function EditTaskButton({ task, users, isManager }: EditTaskButtonProps) 
   const initialState: TaskFormState = { message: "", success: undefined };
   const [state, formAction] = useActionState(updateTask, initialState);
 
-  // New state for status field
-  const [status, setStatus] = useState(task.status);
-
   useEffect(() => {
     if (state.message) {
       toast({
@@ -73,10 +71,6 @@ export function EditTaskButton({ task, users, isManager }: EditTaskButtonProps) 
         </DialogHeader>
         <form action={formAction}>
           <input type="hidden" name="id" value={task.id} />
-
-          {/* Hidden input to ensure status is sent */}
-          <input type="hidden" name="status" value={status} />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             <div className="space-y-1.5 md:col-span-2">
               <Label htmlFor="description_edit">Task Description</Label>
@@ -99,18 +93,6 @@ export function EditTaskButton({ task, users, isManager }: EditTaskButtonProps) 
             <div className="space-y-1.5">
               <Label htmlFor="due_date_edit">Due Date (Optional)</Label>
               <Input id="due_date_edit" name="due_date" type="date" defaultValue={task.due_date ?? ''} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="status_edit">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger id="status_edit"><SelectValue placeholder="Select status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Blocked">Blocked</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <Label htmlFor="notes_edit">Notes (Optional)</Label>
