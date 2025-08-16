@@ -12,6 +12,7 @@ import { FeedIcon } from "@/components/icons/FeedIcon";
 import { ListChecks, PlusCircle } from 'lucide-react';
 import { EditTaskButton } from '@/app/(app)/tasks/edit-task-button';
 import { DeleteTaskButton } from '@/app/(app)/tasks/delete-task-button';
+import { format } from 'date-fns';
 
 interface WorkerDashboardProps {
   tasks: any[];
@@ -84,8 +85,8 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
-                    <TableCell>{task.created_at ? new Date(task.created_at).toLocaleDateString() : 'N/A'}</TableCell>
-                    <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
+                    <TableCell>{task.created_at ? format(new Date(task.created_at), 'MM/dd/yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'MM/dd/yyyy') : 'N/A'}</TableCell>
                     <TableCell className="text-right space-x-1">
                       <span className="text-xs text-muted-foreground">No actions</span>
                     </TableCell>
