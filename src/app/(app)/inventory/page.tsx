@@ -8,6 +8,7 @@ import { AddFeedStockForm } from "./add-feed-stock-form";
 import { AddFeedAllocationForm } from "./add-feed-allocation-form";
 import { DeleteFeedStockButton, DeleteFeedAllocationButton } from "./delete-buttons";
 import { EditFeedStockButton, EditFeedAllocationButton } from "./edit-buttons";
+import { format } from "date-fns";
 
 export default async function InventoryPage() {
   const supabase = createClient();
@@ -77,7 +78,7 @@ export default async function InventoryPage() {
             <TableBody>
               {feedStock && feedStock.map((item: any) => (
                 <TableRow key={item.id} className={item.quantity < lowStockThreshold ? 'bg-destructive/10 hover:bg-destructive/20' : ''}>
-                  <TableCell>{new Date(item.date + 'T00:00:00').toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(item.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
                   <TableCell className="font-medium">{item.feed_type}</TableCell>
                   <TableCell>
                     {item.quantity < lowStockThreshold && <CircleAlert className="h-4 w-4 inline mr-1 text-destructive" />}
@@ -127,7 +128,7 @@ export default async function InventoryPage() {
             <TableBody>
               {feedAllocations && feedAllocations.map((item: any) => (
                 <TableRow key={item.id}>
-                  <TableCell>{new Date(item.date + 'T00:00:00').toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(item.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
                   <TableCell>{item.shed}</TableCell>
                   <TableCell className="font-medium">{item.feed_type}</TableCell>
                   <TableCell>{item.quantity_allocated}</TableCell>

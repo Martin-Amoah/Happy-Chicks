@@ -6,6 +6,7 @@ import { ListChecks } from "lucide-react";
 import { AddTaskForm } from "./add-task-form";
 import { EditTaskButton } from "./edit-task-button";
 import { DeleteTaskButton } from "./delete-task-button";
+import { format } from "date-fns";
 
 export default async function TasksPage() {
   const supabase = createClient();
@@ -80,17 +81,14 @@ export default async function TasksPage() {
             </TableHeader>
             <TableBody>
               {tasks && tasks.map((task) => {
-                const dueDate = task.due_date ? new Date(task.due_date + 'T00:00:00') : null;
-                const createdAt = new Date(task.created_at);
-
                 return (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
                     <TableCell>{task.profiles?.full_name || 'Unassigned'}</TableCell>
-                    <TableCell>{dueDate ? `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear()}` : 'N/A'}</TableCell>
-                    <TableCell>{`${createdAt.getMonth() + 1}/${createdAt.getDate()}/${createdAt.getFullYear()}`}</TableCell>
+                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'MM/dd/yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{format(new Date(task.created_at), 'MM/dd/yyyy')}</TableCell>
                     <TableCell className="text-right space-x-1">
                       {isManager ? (
                         <>

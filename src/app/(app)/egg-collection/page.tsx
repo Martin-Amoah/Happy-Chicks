@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AddEggRecordForm } from "./add-egg-record-form";
 import { EditEggRecordButton } from "./edit-egg-record-button";
 import { DeleteEggCollectionButton } from "./delete-button";
+import { format } from "date-fns";
 
 export default async function EggCollectionPage() {
   const supabase = createClient();
@@ -47,7 +48,7 @@ export default async function EggCollectionPage() {
             <TableBody>
               {eggCollectionData && eggCollectionData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{new Date(record.date + 'T00:00:00').toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
                   <TableCell>{record.total_eggs}</TableCell>
                   <TableCell>{record.broken_eggs}</TableCell>

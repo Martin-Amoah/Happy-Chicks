@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit3, CircleDollarSign } from "lucide-react";
 import { AddSaleForm } from "./add-sale-form";
 import { DeleteSaleButton } from "./delete-button";
+import { format } from "date-fns";
 
 export default async function SalesPage() {
   const supabase = createClient();
@@ -50,7 +51,7 @@ export default async function SalesPage() {
             <TableBody>
               {sales && sales.map((sale: any) => (
                 <TableRow key={sale.id}>
-                  <TableCell>{new Date(sale.date + 'T00:00:00').toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(sale.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
                   <TableCell className="font-medium">{sale.item_sold}</TableCell>
                   <TableCell>{sale.quantity}</TableCell>
                   <TableCell>{sale.unit}</TableCell>
