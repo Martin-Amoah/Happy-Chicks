@@ -85,8 +85,8 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
-                    <TableCell>{task.created_at ? format(new Date(task.created_at), 'MM/dd/yyyy') : 'N/A'}</TableCell>
-                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'MM/dd/yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{task.created_at ? format(new Date(task.created_at), 'dd/MM/yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}</TableCell>
                     <TableCell className="text-right space-x-1">
                       <span className="text-xs text-muted-foreground">No actions</span>
                     </TableCell>

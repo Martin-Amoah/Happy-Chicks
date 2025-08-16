@@ -51,7 +51,7 @@ export default async function SalesPage() {
             <TableBody>
               {sales && sales.map((sale: any) => (
                 <TableRow key={sale.id}>
-                  <TableCell>{format(new Date(sale.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(sale.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
                   <TableCell className="font-medium">{sale.item_sold}</TableCell>
                   <TableCell>{sale.quantity}</TableCell>
                   <TableCell>{sale.unit}</TableCell>

@@ -123,7 +123,7 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
                     <ActivityIcon type={item.type} />
                     <div className="flex-1">
                         <p className="text-sm font-medium">{activityText(item)}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(item.date + 'T00:00:00'), 'PP')}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(item.date + 'T00:00:00'), 'dd/MM/yyyy')}</p>
                     </div>
                 </div>
             ))}

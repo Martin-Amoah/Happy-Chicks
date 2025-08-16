@@ -87,8 +87,8 @@ export default async function TasksPage() {
                       {task.description || 'N/A'}
                     </TableCell>
                     <TableCell>{task.profiles?.full_name || 'Unassigned'}</TableCell>
-                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'MM/dd/yyyy') : 'N/A'}</TableCell>
-                    <TableCell>{format(new Date(task.created_at), 'MM/dd/yyyy')}</TableCell>
+                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{format(new Date(task.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right space-x-1">
                       {isManager ? (
                         <>

@@ -48,7 +48,7 @@ export default async function EggCollectionPage() {
             <TableBody>
               {eggCollectionData && eggCollectionData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
                   <TableCell>{record.total_eggs}</TableCell>
                   <TableCell>{record.broken_eggs}</TableCell>

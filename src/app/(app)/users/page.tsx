@@ -87,7 +87,7 @@ export default async function UserManagementPage() {
                       {user.status || 'Invited'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'MM/dd/yyyy') : 'Never'}</TableCell>
+                  <TableCell>{user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'dd/MM/yyyy') : 'Never'}</TableCell>
                   <TableCell className="text-right space-x-1">
                     {isManager && currentUser?.id !== user.id ? (
                         <>

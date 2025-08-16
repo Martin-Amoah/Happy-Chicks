@@ -47,7 +47,7 @@ export default async function DeadBirdsPage() {
             <TableBody>
               {mortalityData && mortalityData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'MM/dd/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
                   <TableCell>{record.count}</TableCell>
                   <TableCell className="max-w-xs truncate">{record.cause || 'N/A'}</TableCell>
