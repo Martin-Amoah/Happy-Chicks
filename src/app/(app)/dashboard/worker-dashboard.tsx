@@ -38,35 +38,35 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
     <div className="space-y-6">
       <Card className="bg-gradient-to-r from-card to-card/80">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">Worker Dashboard</CardTitle>
-          <CardDescription>Welcome back! Here are your quick actions and assigned tasks.</CardDescription>
+          <CardTitle className="font-headline text-3xl">Worker Dashboard</CardTitle>
+          <CardDescription className="text-base">Welcome back! Here are your quick actions and assigned tasks.</CardDescription>
         </CardHeader>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
+          <CardTitle className="font-headline flex items-center gap-2 text-2xl">
             <PlusCircle className="h-6 w-6 text-primary" /> Quick Actions
           </CardTitle>
           <CardDescription>Quickly log daily farm activities.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+          <Button asChild variant="outline" size="lg" className="h-24 flex flex-col items-center justify-center gap-2">
             <Link href="/egg-collection">
               <EggIcon className="h-8 w-8 text-accent" />
-              <span>Record Egg Collection</span>
+              <span className="text-base">Record Egg Collection</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+          <Button asChild variant="outline" size="lg" className="h-24 flex flex-col items-center justify-center gap-2">
             <Link href="/dead-birds">
               <BirdIcon className="h-8 w-8 text-destructive" />
-              <span>Log Dead Birds</span>
+              <span className="text-base">Log Dead Birds</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+          <Button asChild variant="outline" size="lg" className="h-24 flex flex-col items-center justify-center gap-2">
             <Link href="/inventory">
                <FeedIcon className="h-8 w-8 text-blue-500" />
-              <span>Allocate Feed</span>
+              <span className="text-base">Allocate Feed</span>
             </Link>
           </Button>
         </CardContent>
@@ -74,7 +74,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2">
+          <CardTitle className="font-headline flex items-center gap-2 text-2xl">
             <ListChecks className="h-6 w-6 text-primary" /> My Assigned Tasks
           </CardTitle>
           <CardDescription>Tasks assigned to you. Update the status as you work on them.</CardDescription>
