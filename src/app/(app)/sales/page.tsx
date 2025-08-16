@@ -2,9 +2,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit3, CircleDollarSign } from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 import { AddSaleForm } from "./add-sale-form";
+import { EditSaleButton } from "./edit-sale-button";
 import { DeleteSaleButton } from "./delete-button";
 import { format } from "date-fns";
 
@@ -60,7 +60,7 @@ export default async function SalesPage() {
                   <TableCell>{sale.customer_name || 'N/A'}</TableCell>
                   <TableCell>{sale.recorded_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <Button variant="ghost" size="icon" className="hover:text-accent" disabled><Edit3 className="h-4 w-4" /></Button>
+                    <EditSaleButton record={sale} userName={userName} />
                     <DeleteSaleButton id={sale.id} />
                   </TableCell>
                 </TableRow>
