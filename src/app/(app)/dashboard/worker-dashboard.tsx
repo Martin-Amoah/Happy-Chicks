@@ -72,6 +72,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Description</TableHead>
+                <TableHead>Date Assigned</TableHead>
                 <TableHead>Due Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -83,6 +84,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
+                    <TableCell>{task.created_at ? new Date(task.created_at).toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell className="text-right space-x-1">
                       <EditTaskButton task={task} users={users ?? []} isManager={false} />
@@ -93,7 +95,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
               })}
               {(!pendingTasks || pendingTasks.length === 0) && (
                  <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
                  </TableRow>
               )}
             </TableBody>
