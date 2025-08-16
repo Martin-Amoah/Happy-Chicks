@@ -1,0 +1,124 @@
+
+"use client";
+
+import React from 'react';
+import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { EggIcon } from "@/components/icons/EggIcon";
+import { BirdIcon } from "@/components/icons/BirdIcon";
+import { FeedIcon } from "@/components/icons/FeedIcon";
+import { ListChecks, PlusCircle } from 'lucide-react';
+import { EditTaskButton } from '@/app/(app)/tasks/edit-task-button';
+import { DeleteTaskButton } from '@/app/(app)/tasks/delete-task-button';
+
+interface WorkerDashboardProps {
+  tasks: any[];
+  users: any[];
+}
+
+export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'Completed': return { variant: 'default', className: 'bg-green-600 text-white' };
+      case 'In Progress': return { variant: 'outline', className: 'border-blue-500 text-blue-600' };
+      case 'Blocked': return { variant: 'destructive', className: '' };
+      case 'Pending':
+      default:
+        return { variant: 'secondary', className: '' };
+    }
+  };
+
+  const pendingTasks = tasks.filter(t => t.status !== 'Completed');
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gradient-to-r from-card to-card/80">
+        <CardHeader>
+          <CardTitle className="font-headline text-2xl">Worker Dashboard</CardTitle>
+          <CardDescription>Welcome back! Here are your quick actions and assigned tasks.</CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <PlusCircle className="h-6 w-6 text-primary" /> Quick Actions
+          </CardTitle>
+          <CardDescription>Quickly log daily farm activities.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+            <Link href="/egg-collection">
+              <EggIcon className="h-8 w-8 text-accent" />
+              <span>Record Egg Collection</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+            <Link href="/dead-birds">
+              <BirdIcon className="h-8 w-8 text-destructive" />
+              <span>Log Dead Birds</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-20 flex flex-col items-center justify-center gap-2">
+            <Link href="/inventory">
+               <FeedIcon className="h-8 w-8 text-blue-500" />
+              <span>Allocate Feed</span>
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <ListChecks className="h-6 w-6 text-primary" /> My Assigned Tasks
+          </CardTitle>
+          <CardDescription>Tasks assigned to you. Update the status as you work on them.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Description</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pendingTasks && pendingTasks.map((task) => {
+                const badgeStyle = getStatusBadgeVariant(task.status);
+                return (
+                  <TableRow key={task.id}>
+                    <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
+                      {task.description || 'N/A'}
+                    </TableCell>
+                    <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge variant={badgeStyle.variant as any} className={badgeStyle.className}>
+                        {task.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <EditTaskButton task={task} users={users ?? []} isManager={false} />
+                      <DeleteTaskButton taskId={task.id} />
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+              {(!pendingTasks || pendingTasks.length === 0) && (
+                 <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
+                 </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
