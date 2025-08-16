@@ -80,17 +80,26 @@ export default async function TasksPage() {
             </TableHeader>
             <TableBody>
               {tasks && tasks.map((task) => {
+                const dueDate = task.due_date ? new Date(task.due_date + 'T00:00:00') : null;
+                const createdAt = new Date(task.created_at);
+
                 return (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
                       {task.description || 'N/A'}
                     </TableCell>
                     <TableCell>{task.profiles?.full_name || 'Unassigned'}</TableCell>
-                    <TableCell>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString() : 'N/A'}</TableCell>
-                    <TableCell>{new Date(task.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{dueDate ? `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear()}` : 'N/A'}</TableCell>
+                    <TableCell>{`${createdAt.getMonth() + 1}/${createdAt.getDate()}/${createdAt.getFullYear()}`}</TableCell>
                     <TableCell className="text-right space-x-1">
-                      <EditTaskButton task={task as any} users={users ?? []} isManager={isManager} />
-                      <DeleteTaskButton taskId={task.id} />
+                      {isManager ? (
+                        <>
+                          <EditTaskButton task={task as any} users={users ?? []} isManager={isManager} />
+                          <DeleteTaskButton taskId={task.id} />
+                        </>
+                      ) : (
+                         <span className="text-xs text-muted-foreground">No actions</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 )
