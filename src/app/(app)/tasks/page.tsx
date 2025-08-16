@@ -70,7 +70,7 @@ export default async function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <AddTaskForm users={users ?? []} isManager={isManager} />
+      {isManager && <AddTaskForm users={users ?? []} isManager={isManager} />}
 
       <Card>
         <CardHeader>
