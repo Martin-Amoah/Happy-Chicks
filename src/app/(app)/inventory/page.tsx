@@ -12,13 +12,17 @@ import { EditFeedStockButton, EditFeedAllocationButton } from "./edit-buttons";
 export default async function InventoryPage() {
   const supabase = createClient();
   
-  const [stockResponse, allocationResponse] = await Promise.all([
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const [stockResponse, allocationResponse, profileResponse] = await Promise.all([
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
-    supabase.from('feed_allocations').select('*').order('date', { ascending: false })
+    supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
+    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
 
   const { data: feedStock, error: stockError } = stockResponse;
   const { data: feedAllocations, error: allocationError } = allocationResponse;
+  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
 
   if (stockError || allocationError) {
     const errorMessage = stockError?.message || allocationError?.message;
@@ -98,7 +102,7 @@ export default async function InventoryPage() {
         </CardContent>
       </Card>
       
-      <AddFeedAllocationForm />
+      <AddFeedAllocationForm userName={userName} />
 
       <Card>
         <CardHeader>
@@ -130,7 +134,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.unit}</TableCell>
                   <TableCell>{item.allocated_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                     <EditFeedAllocationButton record={item} />
+                     <EditFeedAllocationButton record={item} userName={userName} />
                     <DeleteFeedAllocationButton id={item.id} />
                   </TableCell>
                 </TableRow>

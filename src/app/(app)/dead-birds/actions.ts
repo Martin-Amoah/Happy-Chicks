@@ -9,7 +9,6 @@ const formSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   shed: z.string().min(1, 'Shed is required'),
   count: z.coerce.number().int().min(1, 'Count must be at least 1'),
-  recorded_by: z.string().min(1, 'Recorded by is required'),
   cause: z.string().optional(),
 });
 
@@ -31,6 +30,20 @@ export type FormState = {
   success?: boolean;
 };
 
+async function getCurrentUserFullName() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 'System';
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+    
+    return profile?.full_name ?? user.email ?? 'System';
+}
+
 export async function addMortalityRecord(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
 
@@ -49,7 +62,6 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
     date: formData.get('mortalityDate'),
     shed: formData.get('shed'),
     count: formData.get('count'),
-    recorded_by: formData.get('recordedBy'),
     cause: formData.get('cause'),
   });
 
@@ -61,7 +73,8 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
     };
   }
   
-  const { date, shed, count, recorded_by, cause } = validatedFields.data;
+  const { date, shed, count, cause } = validatedFields.data;
+  const recorded_by = await getCurrentUserFullName();
 
   const { error } = await supabase.from('mortality_records').insert({
     date,
@@ -97,7 +110,6 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
     date: formData.get('mortalityDate'),
     shed: formData.get('shed'),
     count: formData.get('count'),
-    recorded_by: formData.get('recordedBy'),
     cause: formData.get('cause'),
   });
 
@@ -109,7 +121,8 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
     };
   }
   
-  const { id, date, shed, count, cause, recorded_by } = validatedFields.data;
+  const { id, date, shed, count, cause } = validatedFields.data;
+  const recorded_by = await getCurrentUserFullName();
 
   const { error } = await supabase
     .from('mortality_records')

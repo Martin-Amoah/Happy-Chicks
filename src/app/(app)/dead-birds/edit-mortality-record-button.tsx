@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Loader2 } from "lucide-react";
+import { Edit, Loader2, User } from "lucide-react";
 import { updateMortalityRecord, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
@@ -39,7 +39,7 @@ function SubmitButton() {
   );
 }
 
-export function EditMortalityRecordButton({ record }: { record: MortalityRecord }) {
+export function EditMortalityRecordButton({ record, userName }: { record: MortalityRecord, userName: string }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const initialState: FormState = { message: "", success: undefined };
@@ -99,9 +99,11 @@ export function EditMortalityRecordButton({ record }: { record: MortalityRecord 
                         {state.errors?.count && <p className="text-sm font-medium text-destructive">{state.errors.count[0]}</p>}
                     </div>
                      <div className="space-y-1.5">
-                        <Label htmlFor="recordedBy-edit">Recorded By</Label>
-                        <Input id="recordedBy-edit" name="recordedBy" placeholder="e.g., John Doe" defaultValue={record.recorded_by} />
-                        {state.errors?.recorded_by && <p className="text-sm font-medium text-destructive">{state.errors.recorded_by[0]}</p>}
+                        <Label>Recorded By</Label>
+                         <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                           <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                           <span>{userName} (Current User)</span>
+                         </div>
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
                         <Label htmlFor="cause-edit">Suspected Cause</Label>

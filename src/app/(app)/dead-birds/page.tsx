@@ -8,10 +8,15 @@ import { DeleteMortalityRecordButton } from "./delete-mortality-record-button";
 
 export default async function DeadBirdsPage() {
   const supabase = createClient();
-  const { data: mortalityData, error } = await supabase
-    .from('mortality_records')
-    .select('*')
-    .order('date', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [mortalityResponse, profileResponse] = await Promise.all([
+    supabase.from('mortality_records').select('*').order('date', { ascending: false }),
+    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+  ]);
+  
+  const { data: mortalityData, error } = mortalityResponse;
+  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -19,7 +24,7 @@ export default async function DeadBirdsPage() {
 
   return (
     <div className="space-y-6">
-      <AddMortalityRecordForm />
+      <AddMortalityRecordForm userName={userName} />
 
       <Card>
         <CardHeader>
@@ -47,7 +52,7 @@ export default async function DeadBirdsPage() {
                   <TableCell className="max-w-xs truncate">{record.cause || 'N/A'}</TableCell>
                   <TableCell>{record.recorded_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditMortalityRecordButton record={record} />
+                    <EditMortalityRecordButton record={record} userName={userName} />
                     <DeleteMortalityRecordButton id={record.id} />
                   </TableCell>
                 </TableRow>

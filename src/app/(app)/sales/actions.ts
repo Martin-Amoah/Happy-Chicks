@@ -13,7 +13,6 @@ const formSchema = z.object({
   unit_price: z.coerce.number().min(0, 'Unit price cannot be negative'),
   total_price: z.coerce.number().min(0, 'Total price cannot be negative'),
   customer_name: z.string().optional(),
-  recorded_by: z.string().min(1, 'Recorded by is required'),
 });
 
 export type FormState = {
@@ -21,6 +20,20 @@ export type FormState = {
   errors?: Record<string, string[] | undefined>;
   success?: boolean;
 };
+
+async function getCurrentUserFullName() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 'System';
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+    
+    return profile?.full_name ?? user.email ?? 'System';
+}
 
 export async function addSale(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
@@ -37,8 +50,11 @@ export async function addSale(prevState: FormState | undefined, formData: FormDa
     };
   }
   
+  const recorded_by = await getCurrentUserFullName();
+
   const { error } = await supabase.from('sales').insert({
     ...validatedFields.data,
+    recorded_by,
     user_id: user.id,
   });
 

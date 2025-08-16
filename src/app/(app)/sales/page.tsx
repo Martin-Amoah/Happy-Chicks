@@ -9,10 +9,15 @@ import { DeleteSaleButton } from "./delete-button";
 
 export default async function SalesPage() {
   const supabase = createClient();
-  const { data: sales, error } = await supabase
-    .from('sales')
-    .select('*')
-    .order('date', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [salesResponse, profileResponse] = await Promise.all([
+    supabase.from('sales').select('*').order('date', { ascending: false }),
+    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+  ]);
+  
+  const { data: sales, error } = salesResponse;
+  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -20,7 +25,7 @@ export default async function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <AddSaleForm />
+      <AddSaleForm userName={userName} />
 
       <Card>
         <CardHeader>

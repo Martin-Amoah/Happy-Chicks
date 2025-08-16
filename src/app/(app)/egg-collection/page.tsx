@@ -8,10 +8,15 @@ import { DeleteEggCollectionButton } from "./delete-button";
 
 export default async function EggCollectionPage() {
   const supabase = createClient();
-  const { data: eggCollectionData, error } = await supabase
-    .from('egg_collections')
-    .select('*')
-    .order('date', { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [eggCollectionResponse, profileResponse] = await Promise.all([
+      supabase.from('egg_collections').select('*').order('date', { ascending: false }),
+      user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+  ]);
+  
+  const { data: eggCollectionData, error } = eggCollectionResponse;
+  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -20,7 +25,7 @@ export default async function EggCollectionPage() {
 
   return (
     <div className="space-y-6">
-      <AddEggRecordForm />
+      <AddEggRecordForm userName={userName} />
 
       <Card>
         <CardHeader>
@@ -48,7 +53,7 @@ export default async function EggCollectionPage() {
                   <TableCell>{record.broken_eggs}</TableCell>
                   <TableCell>{record.collected_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditEggRecordButton record={record} />
+                    <EditEggRecordButton record={record} userName={userName} />
                     <DeleteEggCollectionButton id={record.id} />
                   </TableCell>
                 </TableRow>
