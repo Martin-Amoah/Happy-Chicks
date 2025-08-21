@@ -5,11 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
-// Schema for adding a new feed type
-const addFeedTypeSchema = z.object({
-  name: z.string().min(1, 'Feed type name is required.'),
-});
-
 // Schema for adding feed stock
 const addFeedStockSchema = z.object({
   date: z.string().min(1, 'Date is required'),
@@ -58,42 +53,6 @@ async function getCurrentUserFullName() {
         .single();
     
     return profile?.full_name ?? user.email ?? 'System';
-}
-
-
-// Action to add a new feed type
-export async function addFeedType(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { message: 'Authentication error.', success: false };
-
-  // Optional: Add manager role check here if needed
-
-  const validatedFields = addFeedTypeSchema.safeParse({ name: formData.get('name') });
-
-  if (!validatedFields.success) {
-    return {
-      message: 'Invalid form data.',
-      errors: validatedFields.error.flatten().fieldErrors,
-      success: false,
-    };
-  }
-
-  const { error } = await supabase.from('feed_types').insert({
-    name: validatedFields.data.name,
-    user_id: user.id
-  });
-
-  if (error) {
-    console.error('Supabase error:', error);
-     if (error.code === '23505') { // unique constraint violation
-      return { message: 'This feed type already exists.', success: false };
-    }
-    return { message: `Failed to save feed type: ${error.message}`, success: false };
-  }
-
-  revalidatePath('/inventory');
-  return { message: `Successfully added '${validatedFields.data.name}'.`, success: true };
 }
 
 

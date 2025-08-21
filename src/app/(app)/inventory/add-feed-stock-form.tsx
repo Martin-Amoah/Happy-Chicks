@@ -3,7 +3,7 @@
 
 import React, { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PackagePlus, Loader2 } from "lucide-react";
 import { addFeedStock, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
-
-interface AddFeedStockFormProps {
-  feedTypes: { id: string; name: string }[];
-}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -26,7 +22,7 @@ function SubmitButton() {
   );
 }
 
-export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
+export function AddFeedStockForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -62,16 +58,7 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="feedType">Feed Type</Label>
-            <Select name="feedType">
-              <SelectTrigger id="feedType">
-                <SelectValue placeholder="Select feed type" />
-              </SelectTrigger>
-              <SelectContent>
-                {feedTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input id="feedType" name="feedType" placeholder="e.g., Broiler Starter" />
              {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
           </div>
           <div className="space-y-1.5">
@@ -98,10 +85,10 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
             <Label htmlFor="cost">Cost per Unit (Optional)</Label>
             <Input id="cost" name="cost" type="number" step="0.01" placeholder="e.g., 50.00" />
           </div>
-          <div className="md:col-span-2 lg:col-span-3 flex justify-end pt-2">
-            <SubmitButton />
-          </div>
         </CardContent>
+        <CardFooter className="flex justify-end pt-2">
+            <SubmitButton />
+        </CardFooter>
       </form>
     </Card>
   );

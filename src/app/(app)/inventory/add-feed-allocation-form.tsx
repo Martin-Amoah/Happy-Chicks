@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AddFeedAllocationFormProps {
   userName: string;
-  feedTypes: { id: string; name: string }[];
 }
 
 function SubmitButton() {
@@ -27,7 +26,7 @@ function SubmitButton() {
   );
 }
 
-export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocationFormProps) {
+export function AddFeedAllocationForm({ userName }: AddFeedAllocationFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -78,16 +77,7 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
                 </div>
                  <div className="space-y-1.5">
                     <Label htmlFor="feedType">Feed Type</Label>
-                    <Select name="feedType">
-                      <SelectTrigger id="feedType">
-                        <SelectValue placeholder="Select feed type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {feedTypes.map((type) => (
-                          <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input id="feedType" name="feedType" placeholder="e.g., Broiler Starter" />
                     {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                 </div>
                  <div className="space-y-1.5">
