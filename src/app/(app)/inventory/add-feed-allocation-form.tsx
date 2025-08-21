@@ -12,6 +12,11 @@ import { Send, Loader2, User } from "lucide-react";
 import { addFeedAllocation, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 
+interface AddFeedAllocationFormProps {
+  userName: string;
+  feedTypes: { id: string; name: string }[];
+}
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -22,7 +27,7 @@ function SubmitButton() {
   );
 }
 
-export function AddFeedAllocationForm({ userName }: { userName: string }) {
+export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocationFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -73,7 +78,16 @@ export function AddFeedAllocationForm({ userName }: { userName: string }) {
                 </div>
                  <div className="space-y-1.5">
                     <Label htmlFor="feedType">Feed Type</Label>
-                    <Input id="feedType" name="feedType" placeholder="e.g., Layers Mash" />
+                    <Select name="feedType">
+                      <SelectTrigger id="feedType">
+                        <SelectValue placeholder="Select feed type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {feedTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                 </div>
                  <div className="space-y-1.5">

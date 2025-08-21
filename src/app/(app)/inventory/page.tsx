@@ -3,30 +3,35 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CircleAlert, PackagePlus, Send } from "lucide-react";
+import { CircleAlert, PackagePlus, Send, Wheat } from "lucide-react";
 import { AddFeedStockForm } from "./add-feed-stock-form";
 import { AddFeedAllocationForm } from "./add-feed-allocation-form";
 import { DeleteFeedStockButton, DeleteFeedAllocationButton } from "./delete-buttons";
 import { EditFeedStockButton, EditFeedAllocationButton } from "./edit-buttons";
 import { format } from "date-fns";
+import { AddFeedTypeForm } from "./add-feed-type-form";
 
 export default async function InventoryPage() {
   const supabase = createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
   
-  const [stockResponse, allocationResponse, profileResponse] = await Promise.all([
+  const [stockResponse, allocationResponse, profileResponse, feedTypesResponse] = await Promise.all([
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
-    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+    user ? supabase.from('profiles').select('full_name, role').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    supabase.from('feed_types').select('id, name').order('name')
   ]);
 
   const { data: feedStock, error: stockError } = stockResponse;
   const { data: feedAllocations, error: allocationError } = allocationResponse;
+  const { data: feedTypes, error: feedTypesError } = feedTypesResponse;
+  
   const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const isManager = profileResponse.data?.role === 'Manager';
 
-  if (stockError || allocationError) {
-    const errorMessage = stockError?.message || allocationError?.message;
+  if (stockError || allocationError || feedTypesError) {
+    const errorMessage = stockError?.message || allocationError?.message || feedTypesError?.message;
     console.error("Inventory page fetch error:", errorMessage);
     return (
         <div className="space-y-6">
@@ -36,7 +41,8 @@ export default async function InventoryPage() {
                         <CircleAlert /> Error Loading Inventory
                     </CardTitle>
                     <CardDescription>
-                        Could not fetch inventory data from the database. Please try refreshing the page.
+                        Could not fetch inventory data from the database. Please try refreshing the page. 
+                        If you just added the `feed_types` table, you may need to wait a moment for it to be available.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -49,11 +55,13 @@ export default async function InventoryPage() {
     );
   }
 
-  const lowStockThreshold = 20; // Example: 20 bags/kg
+  const lowStockThreshold = 20;
 
   return (
     <div className="space-y-6">
-      <AddFeedStockForm />
+      {isManager && <AddFeedTypeForm />}
+
+      <AddFeedStockForm feedTypes={feedTypes || []} />
 
       <Card>
         <CardHeader>
@@ -88,7 +96,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.supplier || 'N/A'}</TableCell>
                   <TableCell>{item.cost ? `GH₵${Number(item.cost).toFixed(2)}` : 'N/A'}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditFeedStockButton record={item} />
+                    <EditFeedStockButton record={item} feedTypes={feedTypes || []} />
                     <DeleteFeedStockButton id={item.id} />
                   </TableCell>
                 </TableRow>
@@ -103,7 +111,7 @@ export default async function InventoryPage() {
         </CardContent>
       </Card>
       
-      <AddFeedAllocationForm userName={userName} />
+      <AddFeedAllocationForm userName={userName} feedTypes={feedTypes || []} />
 
       <Card>
         <CardHeader>
@@ -135,7 +143,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.unit}</TableCell>
                   <TableCell>{item.allocated_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                     <EditFeedAllocationButton record={item} userName={userName} />
+                     <EditFeedAllocationButton record={item} userName={userName} feedTypes={feedTypes || []} />
                     <DeleteFeedAllocationButton id={item.id} />
                   </TableCell>
                 </TableRow>
