@@ -6,6 +6,7 @@ import { AddEggRecordForm } from "./add-egg-record-form";
 import { EditEggRecordButton } from "./edit-egg-record-button";
 import { DeleteEggCollectionButton } from "./delete-button";
 import { format } from "date-fns";
+import { EggIcon } from "@/components/icons/EggIcon";
 
 export default async function EggCollectionPage() {
   const supabase = createClient();
@@ -13,11 +14,12 @@ export default async function EggCollectionPage() {
 
   const [eggCollectionResponse, profileResponse] = await Promise.all([
       supabase.from('egg_collections').select('*').order('date', { ascending: false }),
-      user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+      user ? supabase.from('profiles').select('full_name, role').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
   const { data: eggCollectionData, error } = eggCollectionResponse;
   const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const isManager = profileResponse.data?.role === 'Manager';
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -26,11 +28,13 @@ export default async function EggCollectionPage() {
 
   return (
     <div className="space-y-6">
-      <AddEggRecordForm userName={userName} />
+      {!isManager && <AddEggRecordForm userName={userName} />}
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Egg Collection Log</CardTitle>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <EggIcon className="h-6 w-6 text-primary" /> Egg Collection Log
+            </CardTitle>
           <CardDescription>Recent egg collection records.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,8 +58,14 @@ export default async function EggCollectionPage() {
                   <TableCell>{record.broken_eggs}</TableCell>
                   <TableCell>{record.collected_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditEggRecordButton record={record} userName={userName} />
-                    <DeleteEggCollectionButton id={record.id} />
+                    {isManager ? (
+                      <>
+                        <EditEggRecordButton record={record} userName={userName} />
+                        <DeleteEggCollectionButton id={record.id} />
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No actions</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -71,3 +81,4 @@ export default async function EggCollectionPage() {
     </div>
   );
 }
+
