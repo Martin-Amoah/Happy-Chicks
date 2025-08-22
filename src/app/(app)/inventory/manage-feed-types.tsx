@@ -1,12 +1,11 @@
-
 "use client";
 
 import React, { useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PlusCircle, Trash2, Loader2, Wheat } from "lucide-react";
 import { addFeedType, deleteFeedType } from './actions';
 import { useToast } from "@/hooks/use-toast";
