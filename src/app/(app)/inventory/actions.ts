@@ -5,6 +5,62 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
+// Helper function to check if the current user is a manager
+async function isManager() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  
+  if (error || !profile) return false;
+  return profile.role === 'Manager';
+}
+
+// --- Feed Type Actions ---
+const feedTypeSchema = z.object({
+  name: z.string().min(1, 'Feed type name is required.'),
+});
+
+export async function addFeedType(formData: FormData): Promise<{ message: string; success: boolean; }> {
+    const managerCheck = await isManager();
+    if (!managerCheck) return { message: "Permission denied.", success: false };
+
+    const validatedFields = feedTypeSchema.safeParse({ name: formData.get('name') });
+    if (!validatedFields.success) return { message: "Invalid name.", success: false };
+
+    const supabase = createClient();
+    const { error } = await supabase.from('feed_types').insert({ name: validatedFields.data.name });
+
+    if (error) {
+        console.error("Supabase add feed type error:", error);
+        if (error.code === '23505') return { message: "This feed type already exists.", success: false };
+        return { message: `Database error: ${error.message}`, success: false };
+    }
+    revalidatePath('/inventory');
+    return { message: 'Feed type added successfully.', success: true };
+}
+
+export async function deleteFeedType(id: string): Promise<{ message: string; success: boolean; }> {
+    const managerCheck = await isManager();
+    if (!managerCheck) return { message: "Permission denied.", success: false };
+
+    const supabase = createClient();
+    const { error } = await supabase.from('feed_types').delete().eq('id', id);
+
+    if (error) {
+        console.error("Supabase delete feed type error:", error);
+        return { message: `Database error: ${error.message}`, success: false };
+    }
+    revalidatePath('/inventory');
+    return { message: 'Feed type deleted successfully.', success: true };
+}
+
+
 // Schema for adding feed stock
 const addFeedStockSchema = z.object({
   date: z.string().min(1, 'Date is required'),
