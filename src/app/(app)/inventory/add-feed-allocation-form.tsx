@@ -17,6 +17,12 @@ interface AddFeedAllocationFormProps {
   feedTypes: { id: string; name: string }[];
 }
 
+const exampleFeedTypes = [
+    { id: 'ex1', name: 'Layer Mash' },
+    { id: 'ex2', name: 'Grower Mash' },
+    { id: 'ex3', name: 'Chick Mash' },
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -48,6 +54,8 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
 
   const today = new Date().toISOString().split('T')[0];
   const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
+  const combinedFeedTypes = [...exampleFeedTypes, ...feedTypes].filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i);
+
 
   return (
     <Card>
@@ -81,7 +89,7 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
                     <Select name="feedType">
                         <SelectTrigger id="feedType"><SelectValue placeholder="Select a feed type" /></SelectTrigger>
                         <SelectContent>
-                            {feedTypes.map((type) => (
+                            {combinedFeedTypes.map((type) => (
                                 <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
                             ))}
                         </SelectContent>
