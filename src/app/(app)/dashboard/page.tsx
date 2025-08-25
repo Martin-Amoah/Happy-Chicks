@@ -36,7 +36,9 @@ async function getDashboardData() {
     supabase.from('user_details').select('id, full_name'),
   ]);
   
-  const userRole = profileResponse?.data?.role === 'Manager' ? 'Manager' : 'Worker';
+  // Explicitly check for the admin email as a fallback, making the role check more robust.
+  const isAdminByEmail = user?.email === 'happychicks@admin.com';
+  const userRole = (profileResponse?.data?.role === 'Manager' || isAdminByEmail) ? 'Manager' : 'Worker';
   const tasks = tasksResponse.data ?? [];
   const users = usersResponse.data ?? [];
 
