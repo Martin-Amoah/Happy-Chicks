@@ -15,17 +15,13 @@ export default async function UserManagementPage() {
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
   // Use the new user_details view which joins auth.users and profiles
-  const { data: users, error } = await supabase
-    .from('user_details')
-    .select('*')
-    .order('email');
+  const [usersResponse, profileResponse] = await Promise.all([
+      supabase.from('user_details').select('*').order('email'),
+      currentUser ? supabase.from('profiles').select('role').eq('id', currentUser.id).single() : Promise.resolve({ data: null })
+  ]);
     
-  // The current user's role is still needed from the profiles table
-  const { data: profile } = currentUser 
-    ? await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
-    : { data: null };
-
-  const isManager = profile?.role === 'Manager';
+  const { data: users, error } = usersResponse;
+  const isManager = profileResponse.data?.role === 'Manager';
 
   if (error) {
     console.error("Error fetching users:", error.message);
