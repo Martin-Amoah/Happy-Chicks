@@ -31,12 +31,12 @@ async function getDashboardData() {
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
-    user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null }),
+    user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: new Error('User not found') }),
     user ? supabase.from('tasks').select('*, profiles (id, full_name)').eq('assigned_to_id', user.id).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     supabase.from('user_details').select('id, full_name'),
   ]);
   
-  const userRole = profileResponse?.data?.role ?? 'Worker';
+  const userRole = profileResponse?.data?.role === 'Manager' ? 'Manager' : 'Worker';
   const tasks = tasksResponse.data ?? [];
   const users = usersResponse.data ?? [];
 
