@@ -15,8 +15,6 @@ async function getDashboardData() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Since only manager role is active, we streamline data fetching for the manager dashboard.
-  // We can add back worker-specific data fetching if worker roles are re-introduced.
   const [
     eggCollectionData,
     mortalityData,
@@ -36,6 +34,21 @@ async function getDashboardData() {
   // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
   const userRole = (profileResponse?.data?.role === 'Manager' || user?.email === 'happychicks@admin.com') ? 'Manager' : 'Worker';
 
+  // If the user is not a manager, we don't need to fetch all the detailed data.
+  // This is a failsafe; the UI will show the worker dashboard.
+  if (userRole !== 'Manager') {
+    return {
+      userRole,
+      tasks: [],
+      users: [],
+      dashboardData: {
+        kpis: {},
+        charts: {},
+        activityLog: []
+      }
+    };
+  }
+
   const farmConfig = farmConfigData.data;
   const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
 
@@ -46,8 +59,8 @@ async function getDashboardData() {
     // Return empty/default data to prevent crash
     return {
       userRole,
-      tasks: [], // No workers, no tasks needed
-      users: [], // No workers, no users list needed for worker dashboard
+      tasks: [], 
+      users: [],
       dashboardData: {
         kpis: {
           totalEggsToday: 'N/A',
@@ -141,8 +154,8 @@ async function getDashboardData() {
 
   return {
     userRole,
-    tasks: [], // No worker tasks to pass
-    users: [], // No user list to pass
+    tasks: [], 
+    users: [],
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
