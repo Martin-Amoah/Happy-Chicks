@@ -32,7 +32,7 @@ async function getDashboardData() {
   ]);
   
   // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
-  const userRole = (profileResponse?.data?.role === 'Manager' || user?.email === 'happychicks@admin.com') ? 'Manager' : 'Worker';
+  const userRole = (user?.email === 'happychicks@admin.com' || profileResponse?.data?.role === 'Manager') ? 'Manager' : 'Worker';
 
   // If the user is not a manager, we don't need to fetch all the detailed data.
   // This is a failsafe; the UI will show the worker dashboard.
