@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -23,7 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 import type { User } from "@supabase/supabase-js";
 
 export function AppLayout({ children, user }: { children: React.ReactNode; user: User }) {
@@ -106,3 +105,4 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     </SidebarProvider>
   );
 }
+

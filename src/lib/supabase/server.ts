@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createClient() {
+export function createClient() {
   // Try to get cookieStore; guard for environments where it's not available.
   // use a loose type to avoid ReturnType<> mismatch across Next versions
   let cookieStore: any = null
