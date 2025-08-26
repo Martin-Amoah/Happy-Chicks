@@ -8,6 +8,8 @@ import {
 } from 'date-fns';
 import { DashboardClientContent } from './client';
 
+export const dynamic = 'force-dynamic';
+
 async function getDashboardData() {
   const supabase = createClient();
   const today = startOfToday();
@@ -39,8 +41,6 @@ async function getDashboardData() {
   if (userRole !== 'Manager') {
     return {
       userRole,
-      tasks: [],
-      users: [],
       dashboardData: {
         kpis: {},
         charts: {},
@@ -59,8 +59,6 @@ async function getDashboardData() {
     // Return empty/default data to prevent crash
     return {
       userRole,
-      tasks: [], 
-      users: [],
       dashboardData: {
         kpis: {
           totalEggsToday: 'N/A',
@@ -154,8 +152,6 @@ async function getDashboardData() {
 
   return {
     userRole,
-    tasks: [], 
-    users: [],
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
@@ -176,14 +172,14 @@ async function getDashboardData() {
 }
 
 export default async function DashboardPage() {
-  const { userRole, dashboardData, tasks, users } = await getDashboardData();
+  const { userRole, dashboardData } = await getDashboardData();
   
   return (
     <DashboardClientContent 
         userRole={userRole}
         dashboardData={dashboardData}
-        tasks={tasks}
-        users={users}
+        tasks={[]}
+        users={[]}
     />
   );
 }
