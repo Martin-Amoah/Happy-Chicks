@@ -33,8 +33,7 @@ async function getDashboardData() {
     user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: new Error('User not found') }),
   ]);
   
-  // The user role is always 'Manager' for the currently logged-in user.
-  // This logic is kept to allow for future expansion with other roles.
+  // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
   const userRole = (profileResponse?.data?.role === 'Manager' || user?.email === 'happychicks@admin.com') ? 'Manager' : 'Worker';
 
   const farmConfig = farmConfigData.data;
