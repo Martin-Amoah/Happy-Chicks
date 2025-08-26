@@ -1,4 +1,3 @@
-
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,7 +13,12 @@ import { ManageFeedTypes } from "./manage-feed-types";
 export default async function InventoryPage() {
   const supabase = createClient();
   
-  const { data: { user } } = await supabase.auth.getUser();
+  // guard against auth being undefined during prerender/build
+  let user: any = null;
+  if (supabase.auth && typeof supabase.auth.getUser === "function") {
+    const userRes = await supabase.auth.getUser();
+    user = userRes?.data?.user ?? null;
+  }
   
   const [stockResponse, allocationResponse, profileResponse, feedTypesResponse] = await Promise.all([
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),

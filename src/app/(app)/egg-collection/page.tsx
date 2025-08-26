@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
@@ -10,7 +9,13 @@ import { EggIcon } from "@/components/icons/EggIcon";
 
 export default async function EggCollectionPage() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  // guard against auth being undefined during prerender/build
+  let user: any = null;
+  if (supabase.auth && typeof supabase.auth.getUser === "function") {
+    const userRes = await supabase.auth.getUser();
+    user = userRes?.data?.user ?? null;
+  }
 
   const [eggCollectionResponse, profileResponse] = await Promise.all([
       supabase.from('egg_collections').select('*').order('date', { ascending: false }),
