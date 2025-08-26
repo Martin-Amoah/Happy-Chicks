@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AuthForm } from "@/components/auth/auth-form";
+import dynamic from "next/dynamic";
+
+// Load AuthForm as a client-only component to avoid prerendering errors
+const AuthForm = dynamic(
+  () => import("@/components/auth/auth-form").then((mod) => mod.AuthForm),
+  { ssr: false }
+);
 
 export default async function SignInPage() {
   const supabase = createClient();
