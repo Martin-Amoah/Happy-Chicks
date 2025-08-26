@@ -15,7 +15,8 @@ async function getDashboardData() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch profile and tasks in parallel with other data
+  // Since only manager role is active, we streamline data fetching for the manager dashboard.
+  // We can add back worker-specific data fetching if worker roles are re-introduced.
   const [
     eggCollectionData,
     mortalityData,
@@ -23,8 +24,6 @@ async function getDashboardData() {
     feedStockData,
     farmConfigData,
     profileResponse,
-    tasksResponse,
-    usersResponse,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
@@ -32,17 +31,11 @@ async function getDashboardData() {
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
     user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: new Error('User not found') }),
-    user ? supabase.from('tasks').select('*, profiles (id, full_name)').eq('assigned_to_id', user.id).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
-    supabase.from('user_details').select('id, full_name'),
   ]);
   
-  // Explicitly check for the admin email as a fallback, making the role check more robust.
-  const isManagerByRole = profileResponse?.data?.role === 'Manager';
-  const isManagerByEmail = user?.email === 'happychicks@admin.com';
-  const userRole = (isManagerByRole || isManagerByEmail) ? 'Manager' : 'Worker';
-
-  const tasks = tasksResponse.data ?? [];
-  const users = usersResponse.data ?? [];
+  // The user role is always 'Manager' for the currently logged-in user.
+  // This logic is kept to allow for future expansion with other roles.
+  const userRole = (profileResponse?.data?.role === 'Manager' || user?.email === 'happychicks@admin.com') ? 'Manager' : 'Worker';
 
   const farmConfig = farmConfigData.data;
   const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
@@ -54,8 +47,8 @@ async function getDashboardData() {
     // Return empty/default data to prevent crash
     return {
       userRole,
-      tasks,
-      users,
+      tasks: [], // No workers, no tasks needed
+      users: [], // No workers, no users list needed for worker dashboard
       dashboardData: {
         kpis: {
           totalEggsToday: 'N/A',
@@ -149,8 +142,8 @@ async function getDashboardData() {
 
   return {
     userRole,
-    tasks,
-    users,
+    tasks: [], // No worker tasks to pass
+    users: [], // No user list to pass
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
