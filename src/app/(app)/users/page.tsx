@@ -14,11 +14,11 @@ export default async function UserManagementPage() {
   
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  // Use the new user_details view which joins auth.users and profiles
+  // Fetch from the 'profiles' table directly, which is accessible via RLS policies.
   const { data: users, error } = await supabase
-    .from('user_details')
+    .from('profiles')
     .select('*')
-    .order('email');
+    .order('full_name');
     
   // The current user's role is still needed from the profiles table
   const { data: profile } = currentUser 
@@ -76,7 +76,7 @@ export default async function UserManagementPage() {
               {users && users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.email || 'Invited'}</TableCell>
                   <TableCell>
                      <Badge variant={user.role === 'Manager' ? 'default' : 'secondary'}>
                         {user.role}
