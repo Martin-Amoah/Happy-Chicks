@@ -5,7 +5,6 @@ import { Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
-import { format, formatDistanceToNow } from 'date-fns';
 import { AddUserButton } from "./add-user-button";
 import { EditUserButton } from "./edit-user-button";
 import { DeleteUserButton } from "./delete-user-button";
@@ -69,7 +68,6 @@ export default async function UserManagementPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -88,7 +86,6 @@ export default async function UserManagementPage() {
                       {user.status || 'Invited'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'dd/MM/yyyy p') : 'Never'}</TableCell>
                   <TableCell className="text-right space-x-1">
                     {isManager && currentUser?.id !== user.id ? (
                         <>
@@ -103,7 +100,7 @@ export default async function UserManagementPage() {
               ))}
               {(!users || users.length === 0) && (
                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">No users found.</TableCell>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">No users found.</TableCell>
                  </TableRow>
               )}
             </TableBody>
