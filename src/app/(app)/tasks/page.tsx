@@ -49,12 +49,14 @@ export default async function TasksPage() {
                 <CardDescription>
                     Could not fetch data for the tasks page. Please try again later.
                 </CardDescription>
-                {errorMessage && (
-                  <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">
-                    {errorMessage}
-                  </pre>
-                )}
             </CardHeader>
+            {errorMessage && (
+                <CardContent>
+                    <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">
+                        {errorMessage}
+                    </pre>
+                </CardContent>
+            )}
         </Card>
     );
   }
