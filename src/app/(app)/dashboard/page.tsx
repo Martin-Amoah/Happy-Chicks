@@ -28,12 +28,12 @@ async function getDashboardData() {
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
-    supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
-    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
+    supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
+    supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
     user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null }),
     user ? supabase.from('tasks').select('*, profiles (id, full_name)').eq('assigned_to_id', user.id).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
-    supabase.from('user_details').select('id, full_name'),
+    supabase.from('profiles').select('id, full_name'),
   ]);
   
   const userRole = profileResponse?.data?.role ?? 'Worker';
@@ -132,15 +132,15 @@ async function getDashboardData() {
     });
 
   // --- Activity Log ---
-  const latestAllocations = allocations.slice(0, 3).map(a => ({ type: 'feed_allocation', date: a.date, data: a }));
+  const latestAllocations = allocations.slice(0, 3).map(a => ({ type: 'feed_allocation', created_at: a.created_at, data: a }));
   const latestMortality = mortalities
-    .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3)
-    .map(m => ({ type: 'mortality', date: m.date, data: m }));
-  const latestStock = stocks.slice(0, 3).map(s => ({ type: 'feed_stock', date: s.date, data: s }));
+    .map(m => ({ type: 'mortality', created_at: m.created_at, data: m }));
+  const latestStock = stocks.slice(0, 3).map(s => ({ type: 'feed_stock', created_at: s.created_at, data: s }));
   
   const allActivities = [...latestAllocations, ...latestMortality, ...latestStock]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
 
   return {

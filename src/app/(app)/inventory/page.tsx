@@ -16,8 +16,8 @@ export default async function InventoryPage() {
   const { data: { user } } = await supabase.auth.getUser();
   
   const [stockResponse, allocationResponse, profileResponse] = await Promise.all([
-    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
-    supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
+    supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
+    supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
     user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
 
@@ -78,7 +78,7 @@ export default async function InventoryPage() {
             <TableBody>
               {feedStock && feedStock.map((item: any) => (
                 <TableRow key={item.id} className={item.quantity < lowStockThreshold ? 'bg-destructive/10 hover:bg-destructive/20' : ''}>
-                  <TableCell>{format(new Date(item.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell className="font-medium">{item.feed_type}</TableCell>
                   <TableCell>
                     {item.quantity < lowStockThreshold && <CircleAlert className="h-4 w-4 inline mr-1 text-destructive" />}
@@ -128,7 +128,7 @@ export default async function InventoryPage() {
             <TableBody>
               {feedAllocations && feedAllocations.map((item: any) => (
                 <TableRow key={item.id}>
-                  <TableCell>{format(new Date(item.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell>{item.shed}</TableCell>
                   <TableCell className="font-medium">{item.feed_type}</TableCell>
                   <TableCell>{item.quantity_allocated}</TableCell>

@@ -12,7 +12,7 @@ export default async function EggCollectionPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const [eggCollectionResponse, profileResponse] = await Promise.all([
-      supabase.from('egg_collections').select('*').order('date', { ascending: false }),
+      supabase.from('egg_collections').select('*').order('created_at', { ascending: false }),
       user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
@@ -37,7 +37,7 @@ export default async function EggCollectionPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead>Shed</TableHead>
                 <TableHead>Total Eggs</TableHead>
                 <TableHead>Broken Eggs</TableHead>
@@ -48,7 +48,7 @@ export default async function EggCollectionPage() {
             <TableBody>
               {eggCollectionData && eggCollectionData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
                   <TableCell>{record.total_eggs}</TableCell>
                   <TableCell>{record.broken_eggs}</TableCell>

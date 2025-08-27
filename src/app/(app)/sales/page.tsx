@@ -13,7 +13,7 @@ export default async function SalesPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const [salesResponse, profileResponse] = await Promise.all([
-    supabase.from('sales').select('*').order('date', { ascending: false }),
+    supabase.from('sales').select('*').order('created_at', { ascending: false }),
     user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
@@ -37,7 +37,7 @@ export default async function SalesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead>Item Sold</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Unit</TableHead>
@@ -51,7 +51,7 @@ export default async function SalesPage() {
             <TableBody>
               {sales && sales.map((sale: any) => (
                 <TableRow key={sale.id}>
-                  <TableCell>{format(new Date(sale.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(sale.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell className="font-medium">{sale.item_sold}</TableCell>
                   <TableCell>{sale.quantity}</TableCell>
                   <TableCell>{sale.unit}</TableCell>

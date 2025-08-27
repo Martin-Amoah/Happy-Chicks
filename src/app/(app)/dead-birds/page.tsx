@@ -12,7 +12,7 @@ export default async function DeadBirdsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   const [mortalityResponse, profileResponse] = await Promise.all([
-    supabase.from('mortality_records').select('*').order('date', { ascending: false }),
+    supabase.from('mortality_records').select('*').order('created_at', { ascending: false }),
     user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
@@ -36,7 +36,7 @@ export default async function DeadBirdsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead>Shed</TableHead>
                 <TableHead>Count</TableHead>
                 <TableHead>Cause/Notes</TableHead>
@@ -47,7 +47,7 @@ export default async function DeadBirdsPage() {
             <TableBody>
               {mortalityData && mortalityData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{format(new Date(record.date + 'T00:00:00'), 'dd/MM/yyyy')}</TableCell>
+                  <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
                   <TableCell>{record.count}</TableCell>
                   <TableCell className="max-w-xs truncate">{record.cause || 'N/A'}</TableCell>
