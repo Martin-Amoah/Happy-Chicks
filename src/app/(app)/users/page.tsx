@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,7 +88,7 @@ export default async function UserManagementPage() {
                       {user.status || 'Invited'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'dd/MM/yyyy') : 'Never'}</TableCell>
+                  <TableCell>{user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'dd/MM/yyyy p') : 'Never'}</TableCell>
                   <TableCell className="text-right space-x-1">
                     {isManager && currentUser?.id !== user.id ? (
                         <>
