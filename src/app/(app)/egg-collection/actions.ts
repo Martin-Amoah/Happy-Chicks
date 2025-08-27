@@ -8,6 +8,7 @@ import { z } from 'zod';
 const formSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   shed: z.string().min(1, 'Shed is required'),
+  collection_time: z.string().min(1, 'Collection time is required'),
   total_eggs: z.coerce.number().int().min(0, 'Total eggs cannot be negative'),
   broken_eggs: z.coerce.number().int().min(0, 'Broken eggs cannot be negative'),
 });
@@ -22,6 +23,7 @@ export type FormState = {
     id?: string[];
     date?: string[];
     shed?: string[];
+    collection_time?: string[];
     total_eggs?: string[];
     broken_eggs?: string[];
     collected_by?: string[];
@@ -43,6 +45,12 @@ async function getCurrentUserFullName() {
     return profile?.full_name ?? user.email ?? 'System';
 }
 
+function calculateCratesAndPieces(totalEggs: number) {
+    const crates = Math.floor(totalEggs / 30);
+    const pieces = totalEggs % 30;
+    return { crates, pieces };
+}
+
 export async function addEggCollection(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
 
@@ -60,6 +68,7 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
   const validatedFields = formSchema.safeParse({
     date: formData.get('collectionDate'),
     shed: formData.get('shed'),
+    collection_time: formData.get('collection_time'),
     total_eggs: formData.get('totalEggs'),
     broken_eggs: formData.get('brokenEggs'),
   });
@@ -72,13 +81,18 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
     };
   }
   
-  const { date, shed, total_eggs, broken_eggs } = validatedFields.data;
+  const { date, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
   const collected_by = await getCurrentUserFullName();
+  const { crates, pieces } = calculateCratesAndPieces(total_eggs);
+
 
   const { error } = await supabase.from('egg_collections').insert({
     date,
     shed,
+    collection_time,
     total_eggs,
+    crates,
+    pieces,
     broken_eggs,
     collected_by,
     user_id: user.id,
@@ -93,6 +107,7 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
   }
 
   revalidatePath('/egg-collection');
+  revalidatePath('/dashboard');
 
   return {
     message: 'Successfully saved egg collection record.',
@@ -107,6 +122,7 @@ export async function updateEggCollection(prevState: FormState | undefined, form
     id: formData.get('id'),
     date: formData.get('collectionDate'),
     shed: formData.get('shed'),
+    collection_time: formData.get('collection_time'),
     total_eggs: formData.get('totalEggs'),
     broken_eggs: formData.get('brokenEggs'),
   });
@@ -119,12 +135,13 @@ export async function updateEggCollection(prevState: FormState | undefined, form
     };
   }
   
-  const { id, date, shed, total_eggs, broken_eggs } = validatedFields.data;
+  const { id, date, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
   const collected_by = await getCurrentUserFullName();
+  const { crates, pieces } = calculateCratesAndPieces(total_eggs);
 
   const { error } = await supabase
     .from('egg_collections')
-    .update({ date, shed, total_eggs, broken_eggs, collected_by })
+    .update({ date, shed, collection_time, total_eggs, crates, pieces, broken_eggs, collected_by })
     .match({ id });
 
   if (error) {
@@ -136,6 +153,7 @@ export async function updateEggCollection(prevState: FormState | undefined, form
   }
 
   revalidatePath('/egg-collection');
+  revalidatePath('/dashboard');
 
   return {
     message: 'Successfully updated egg collection record.',
@@ -154,5 +172,6 @@ export async function deleteEggCollection(id: string): Promise<{ message: string
   }
 
   revalidatePath('/egg-collection');
+  revalidatePath('/dashboard');
   return { message: 'Successfully deleted egg collection record.', success: true };
 }

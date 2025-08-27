@@ -37,10 +37,13 @@ export default async function EggCollectionPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date & Time</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Shed</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Crates</TableHead>
+                <TableHead>Pieces</TableHead>
                 <TableHead>Total Eggs</TableHead>
-                <TableHead>Broken Eggs</TableHead>
+                <TableHead>Broken</TableHead>
                 <TableHead>Collected By</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -48,9 +51,12 @@ export default async function EggCollectionPage() {
             <TableBody>
               {eggCollectionData && eggCollectionData.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
+                  <TableCell>{format(new Date(record.created_at), 'dd/MM/yyyy')}</TableCell>
                   <TableCell>{record.shed}</TableCell>
-                  <TableCell>{record.total_eggs}</TableCell>
+                  <TableCell>{record.collection_time}</TableCell>
+                  <TableCell>{record.crates}</TableCell>
+                  <TableCell>{record.pieces}</TableCell>
+                  <TableCell className="font-medium">{record.total_eggs}</TableCell>
                   <TableCell>{record.broken_eggs}</TableCell>
                   <TableCell>{record.collected_by}</TableCell>
                   <TableCell className="text-right space-x-1">
@@ -61,7 +67,7 @@ export default async function EggCollectionPage() {
               ))}
               {(!eggCollectionData || eggCollectionData.length === 0) && (
                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">No egg collection records yet.</TableCell>
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">No egg collection records yet.</TableCell>
                  </TableRow>
               )}
             </TableBody>
