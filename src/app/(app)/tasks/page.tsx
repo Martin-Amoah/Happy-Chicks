@@ -30,7 +30,7 @@ export default async function TasksPage() {
       `)
       .order('created_at', { ascending: false }),
     supabase
-      .from('profiles') // Corrected: Fetch from 'profiles' instead of 'user_details'
+      .from('profiles')
       .select('id, full_name'),
     currentUser ? supabase.from('profiles').select('role').eq('id', currentUser.id).single() : Promise.resolve({ data: null, error: null })
   ]);
@@ -48,8 +48,12 @@ export default async function TasksPage() {
                 <CardTitle className="text-destructive">Error Loading Tasks</CardTitle>
                 <CardDescription>
                     Could not fetch data for the tasks page. Please try again later.
-                    {errorMessage && <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">{errorMessage}</pre>}
                 </CardDescription>
+                {errorMessage && (
+                  <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">
+                    {errorMessage}
+                  </pre>
+                )}
             </CardHeader>
         </Card>
     );
