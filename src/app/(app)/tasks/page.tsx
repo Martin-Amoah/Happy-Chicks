@@ -30,7 +30,7 @@ export default async function TasksPage() {
       `)
       .order('created_at', { ascending: false }),
     supabase
-      .from('user_details')
+      .from('profiles') // Corrected: Fetch from 'profiles' instead of 'user_details'
       .select('id, full_name'),
     currentUser ? supabase.from('profiles').select('role').eq('id', currentUser.id).single() : Promise.resolve({ data: null, error: null })
   ]);
