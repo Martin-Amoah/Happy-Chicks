@@ -52,9 +52,9 @@ export default async function TasksPage() {
             </CardHeader>
             {errorMessage && (
                 <CardContent>
-                    <pre className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap">
-                        {errorMessage}
-                    </pre>
+                    <div className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">
+                        <pre className="whitespace-pre-wrap">{errorMessage}</pre>
+                    </div>
                 </CardContent>
             )}
         </Card>
@@ -95,15 +95,17 @@ export default async function TasksPage() {
                     <TableCell>{task.profiles?.full_name || 'Unassigned'}</TableCell>
                     <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}</TableCell>
                     <TableCell>{format(new Date(task.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
-                    <TableCell className="text-right space-x-1">
-                      {isManager ? (
-                        <>
-                          <EditTaskButton task={task as any} users={users ?? []} isManager={isManager} />
-                          <DeleteTaskButton taskId={task.id} />
-                        </>
-                      ) : (
-                         <span className="text-xs text-muted-foreground">No actions</span>
-                      )}
+                    <TableCell className="text-right">
+                      <div className="flex justify-end items-center gap-1 sm:flex-row">
+                        {isManager ? (
+                          <>
+                            <EditTaskButton task={task as any} users={users ?? []} isManager={isManager} />
+                            <DeleteTaskButton taskId={task.id} />
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No actions</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
