@@ -86,7 +86,7 @@ export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
             </DialogHeader>
             <form action={formAction}>
                 <input type="hidden" name="id" value={record.id} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
                      <div className="space-y-1.5">
                         <Label>Date</Label>
                         <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
@@ -172,7 +172,7 @@ export function EditFeedAllocationButton({ record, userName }: { record: FeedAll
             </DialogHeader>
             <form action={formAction}>
                 <input type="hidden" name="id" value={record.id} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
                     <div className="space-y-1.5">
                         <Label>Allocation Date</Label>
                         <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">

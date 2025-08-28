@@ -96,7 +96,7 @@ export function AddSaleForm({ userName }: { userName: string }) {
         <CardDescription>Log sales of farm produce and livestock. The date is automatically set to today.</CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Date of Sale</Label>
             <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">

@@ -51,7 +51,7 @@ export function AddFeedStockForm() {
         <CardDescription>Record new arrivals of feed to the inventory. The date is automatically set to today.</CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Date</Label>
             <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
@@ -88,10 +88,10 @@ export function AddFeedStockForm() {
             <Label htmlFor="cost">Cost per Unit (Optional)</Label>
             <Input id="cost" name="cost" type="number" step="0.01" placeholder="e.g., 50.00" />
           </div>
-          <CardFooter className="md:col-span-2 lg:col-span-3 flex justify-end p-0 pt-4">
-            <SubmitButton />
-          </CardFooter>
         </CardContent>
+        <CardFooter className="flex justify-end">
+          <SubmitButton />
+        </CardFooter>
       </form>
     </Card>
   );

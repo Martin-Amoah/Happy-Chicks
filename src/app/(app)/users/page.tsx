@@ -1,5 +1,6 @@
 
 
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,14 +47,16 @@ export default async function UserManagementPage() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="font-headline flex items-center gap-2">
               <Users className="h-6 w-6 text-primary" /> User Management
             </CardTitle>
             <CardDescription>Manage users, roles, and permissions within Happy Chicks.</CardDescription>
           </div>
-          {isManager && <AddUserButton />}
+          <div className="mt-4 sm:mt-0">
+             {isManager && <AddUserButton />}
+          </div>
         </CardHeader>
       </Card>
 
@@ -66,10 +69,10 @@ export default async function UserManagementPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
+                <TableHead className="hidden md:table-cell">Last Login</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -77,7 +80,7 @@ export default async function UserManagementPage() {
               {users && users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
-                  <TableCell>{user.email || 'Invited'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{user.email || 'Invited'}</TableCell>
                   <TableCell>
                      <Badge variant={user.role === 'Manager' ? 'default' : 'secondary'}>
                         {user.role}
@@ -88,7 +91,7 @@ export default async function UserManagementPage() {
                       {user.status || 'Invited'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "dd/MM/yyyy HH:mm") : 'Never'}
                   </TableCell>
                   <TableCell className="text-right space-x-1">
@@ -118,4 +121,5 @@ export default async function UserManagementPage() {
     </div>
   );
 }
+
 
