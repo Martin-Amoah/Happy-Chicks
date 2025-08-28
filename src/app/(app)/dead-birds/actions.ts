@@ -30,32 +30,31 @@ export type FormState = {
   success?: boolean;
 };
 
-async function getCurrentUserFullName() {
+async function getCurrentUserProfile() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 'System';
+    if (!user) return null;
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, role, assigned_shed')
         .eq('id', user.id)
         .single();
     
-    return profile?.full_name ?? user.email ?? 'System';
+    return profile;
 }
 
 export async function addMortalityRecord(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return {
-      message: 'Authentication error: User not found.',
-      success: false,
-    };
+    return { message: 'Authentication error: User not found.', success: false };
+  }
+
+  const profile = await getCurrentUserProfile();
+  if (!profile) {
+    return { message: 'Authentication error: Profile not found.', success: false };
   }
 
   const validatedFields = formSchema.safeParse({
@@ -72,8 +71,17 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
     };
   }
   
-  const { shed, count, cause } = validatedFields.data;
-  const recorded_by = await getCurrentUserFullName();
+  let { shed, count, cause } = validatedFields.data;
+
+  // Server-side enforcement for worker's assigned shed
+  if (profile.role === 'Worker') {
+      if (!profile.assigned_shed) {
+          return { message: "Action denied. You have not been assigned to a shed.", success: false };
+      }
+      shed = profile.assigned_shed;
+  }
+
+  const recorded_by = profile.full_name ?? user.email ?? 'System';
   const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase.from('mortality_records').insert({
@@ -106,6 +114,16 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
 export async function updateMortalityRecord(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { message: 'Authentication error: User not found.', success: false };
+  }
+
+  const profile = await getCurrentUserProfile();
+  if (!profile) {
+    return { message: 'Authentication error: Profile not found.', success: false };
+  }
+
   const validatedFields = updateFormSchema.safeParse({
     id: formData.get('id'),
     shed: formData.get('shed'),
@@ -121,8 +139,17 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
     };
   }
   
-  const { id, shed, count, cause } = validatedFields.data;
-  const recorded_by = await getCurrentUserFullName();
+  let { id, shed, count, cause } = validatedFields.data;
+  
+  // Server-side enforcement for worker's assigned shed
+  if (profile.role === 'Worker') {
+      if (!profile.assigned_shed) {
+          return { message: "Action denied. You have not been assigned to a shed.", success: false };
+      }
+      shed = profile.assigned_shed;
+  }
+
+  const recorded_by = profile.full_name ?? user.email ?? 'System';
   const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase

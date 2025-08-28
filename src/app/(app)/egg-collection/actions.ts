@@ -31,18 +31,18 @@ export type FormState = {
   success?: boolean;
 };
 
-async function getCurrentUserFullName() {
+async function getCurrentUserProfile() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 'System';
+    if (!user) return null;
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, role, assigned_shed')
         .eq('id', user.id)
         .single();
     
-    return profile?.full_name ?? user.email ?? 'System';
+    return profile;
 }
 
 function calculateCratesAndPieces(totalEggs: number) {
@@ -54,15 +54,14 @@ function calculateCratesAndPieces(totalEggs: number) {
 export async function addEggCollection(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return {
-      message: 'Authentication error: User not found.',
-      success: false,
-    };
+    return { message: 'Authentication error: User not found.', success: false };
+  }
+
+  const profile = await getCurrentUserProfile();
+  if (!profile) {
+    return { message: 'Authentication error: Profile not found.', success: false };
   }
 
   const validatedFields = formSchema.safeParse({
@@ -80,8 +79,17 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
     };
   }
   
-  const { shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
-  const collected_by = await getCurrentUserFullName();
+  let { shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
+  
+  // Server-side enforcement for worker's assigned shed
+  if (profile.role === 'Worker') {
+      if (!profile.assigned_shed) {
+          return { message: "Action denied. You have not been assigned to a shed.", success: false };
+      }
+      shed = profile.assigned_shed;
+  }
+  
+  const collected_by = profile.full_name ?? user.email ?? 'System';
   const { crates, pieces } = calculateCratesAndPieces(total_eggs);
   const date = format(new Date(), 'yyyy-MM-dd');
 
@@ -117,6 +125,16 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
 
 export async function updateEggCollection(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { message: 'Authentication error: User not found.', success: false };
+  }
+
+  const profile = await getCurrentUserProfile();
+  if (!profile) {
+    return { message: 'Authentication error: Profile not found.', success: false };
+  }
+
 
   const validatedFields = updateFormSchema.safeParse({
     id: formData.get('id'),
@@ -134,8 +152,17 @@ export async function updateEggCollection(prevState: FormState | undefined, form
     };
   }
   
-  const { id, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
-  const collected_by = await getCurrentUserFullName();
+  let { id, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
+
+  // Server-side enforcement for worker's assigned shed
+  if (profile.role === 'Worker') {
+      if (!profile.assigned_shed) {
+          return { message: "Action denied. You have not been assigned to a shed.", success: false };
+      }
+      shed = profile.assigned_shed;
+  }
+  
+  const collected_by = profile.full_name ?? user.email ?? 'System';
   const { crates, pieces } = calculateCratesAndPieces(total_eggs);
   const date = format(new Date(), 'yyyy-MM-dd');
 
