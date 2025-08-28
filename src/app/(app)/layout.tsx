@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { createClient } from '@/lib/supabase/server';
@@ -8,6 +7,9 @@ export const metadata: Metadata = {
   title: 'Happy Chicks - Farm Management System',
   description: 'Automated Farm Management System for Happy Chicks',
 };
+
+// Force dynamic rendering for pages under this layout to avoid prerender-time issues
+export const dynamic = 'force-dynamic';
 
 export default async function AuthenticatedAppLayout({
   children,

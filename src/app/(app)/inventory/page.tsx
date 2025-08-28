@@ -1,4 +1,3 @@
-
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,51 +8,55 @@ import { AddFeedAllocationForm } from "./add-feed-allocation-form";
 import { DeleteFeedStockButton, DeleteFeedAllocationButton } from "./delete-buttons";
 import { EditFeedStockButton, EditFeedAllocationButton } from "./edit-buttons";
 import { format } from "date-fns";
+import { ManageFeedTypes } from "./manage-feed-types";
 
 export default async function InventoryPage() {
   const supabase = createClient();
   
-  const { data: { user } } = await supabase.auth.getUser();
+  // guard against auth being undefined during prerender/build
+  let user: any = null;
+  if (supabase.auth && typeof supabase.auth.getUser === "function") {
+    const userRes = await supabase.auth.getUser();
+    user = userRes?.data?.user ?? null;
+  }
   
+<<<<<<< HEAD
   const [stockResponse, allocationResponse, profileResponse] = await Promise.all([
     supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
     user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+=======
+  const [stockResponse, allocationResponse, profileResponse, feedTypesResponse] = await Promise.all([
+    supabase.from('feed_stock').select('*').order('date', { ascending: false }),
+    supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
+    user ? supabase.from('profiles').select('full_name, role').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    supabase.from('feed_types').select('*').order('name')
+>>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
   ]);
 
   const { data: feedStock, error: stockError } = stockResponse;
   const { data: feedAllocations, error: allocationError } = allocationResponse;
+  const { data: feedTypes, error: feedTypesError } = feedTypesResponse;
+  
   const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const isManager = profileResponse.data?.role === 'Manager';
 
-  if (stockError || allocationError) {
-    const errorMessage = stockError?.message || allocationError?.message;
-    console.error("Inventory page fetch error:", errorMessage);
-    return (
-        <div className="space-y-6">
-            <Card className="border-destructive">
-                <CardHeader>
-                    <CardTitle className="text-destructive flex items-center gap-2">
-                        <CircleAlert /> Error Loading Inventory
-                    </CardTitle>
-                    <CardDescription>
-                        Could not fetch inventory data from the database. Please try refreshing the page.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-destructive-foreground bg-destructive p-3 rounded-md">
-                        Details: {errorMessage}
-                    </p>
-                </CardContent>
-            </Card>
-        </div>
-    );
+  if (stockError || allocationError || feedTypesError) {
+    console.error("Inventory page fetch error:", stockError?.message || allocationError?.message || feedTypesError?.message);
+    // You might want to render an error message to the user
   }
-
-  const lowStockThreshold = 20; // Example: 20 bags/kg
+  
+  const lowStockThreshold = 20;
 
   return (
     <div className="space-y-6">
-      <AddFeedStockForm />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+            <AddFeedStockForm feedTypes={feedTypes ?? []} />
+            <AddFeedAllocationForm userName={userName} feedTypes={feedTypes ?? []} />
+        </div>
+        {isManager && <ManageFeedTypes feedTypes={feedTypes ?? []} />}
+      </div>
 
       <Card>
         <CardHeader>
@@ -88,7 +91,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.supplier || 'N/A'}</TableCell>
                   <TableCell>{item.cost ? `GH₵${Number(item.cost).toFixed(2)}` : 'N/A'}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditFeedStockButton record={item} />
+                    <EditFeedStockButton record={item} feedTypes={feedTypes ?? []}/>
                     <DeleteFeedStockButton id={item.id} />
                   </TableCell>
                 </TableRow>
@@ -103,8 +106,6 @@ export default async function InventoryPage() {
         </CardContent>
       </Card>
       
-      <AddFeedAllocationForm userName={userName} />
-
       <Card>
         <CardHeader>
           <CardTitle className="font-headline flex items-center gap-2">
@@ -135,7 +136,7 @@ export default async function InventoryPage() {
                   <TableCell>{item.unit}</TableCell>
                   <TableCell>{item.allocated_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                     <EditFeedAllocationButton record={item} userName={userName} />
+                     <EditFeedAllocationButton record={item} userName={userName} feedTypes={feedTypes ?? []} />
                     <DeleteFeedAllocationButton id={item.id} />
                   </TableCell>
                 </TableRow>

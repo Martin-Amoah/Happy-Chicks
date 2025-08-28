@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
@@ -6,12 +5,20 @@ import { AddEggRecordForm } from "./add-egg-record-form";
 import { EditEggRecordButton } from "./edit-egg-record-button";
 import { DeleteEggCollectionButton } from "./delete-button";
 import { format } from "date-fns";
+import { EggIcon } from "@/components/icons/EggIcon";
 
 export default async function EggCollectionPage() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  // guard against auth being undefined during prerender/build
+  let user: any = null;
+  if (supabase.auth && typeof supabase.auth.getUser === "function") {
+    const userRes = await supabase.auth.getUser();
+    user = userRes?.data?.user ?? null;
+  }
 
   const [eggCollectionResponse, profileResponse] = await Promise.all([
+<<<<<<< HEAD
       supabase.from('egg_collections').select('*').order('created_at', { ascending: false }),
       user ? supabase.from('profiles').select('full_name, role, assigned_shed').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
@@ -23,6 +30,15 @@ export default async function EggCollectionPage() {
   const isManager = profile?.role === 'Manager';
   const assignedShed = profile?.assigned_shed;
 
+=======
+      supabase.from('egg_collections').select('*').order('date', { ascending: false }),
+      user ? supabase.from('profiles').select('full_name, role').eq('id', user.id).single() : Promise.resolve({ data: null })
+  ]);
+  
+  const { data: eggCollectionData, error } = eggCollectionResponse;
+  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const isManager = profileResponse.data?.role === 'Manager';
+>>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -31,11 +47,17 @@ export default async function EggCollectionPage() {
 
   return (
     <div className="space-y-6">
+<<<<<<< HEAD
       <AddEggRecordForm userName={userName} isManager={isManager} assignedShed={assignedShed} />
+=======
+      {!isManager && <AddEggRecordForm userName={userName} />}
+>>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Egg Collection Log</CardTitle>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <EggIcon className="h-6 w-6 text-primary" /> Egg Collection Log
+            </CardTitle>
           <CardDescription>Recent egg collection records.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,8 +87,14 @@ export default async function EggCollectionPage() {
                   <TableCell>{record.broken_eggs}</TableCell>
                   <TableCell>{record.collected_by}</TableCell>
                   <TableCell className="text-right space-x-1">
-                    <EditEggRecordButton record={record} userName={userName} />
-                    <DeleteEggCollectionButton id={record.id} />
+                    {isManager ? (
+                      <>
+                        <EditEggRecordButton record={record} userName={userName} />
+                        <DeleteEggCollectionButton id={record.id} />
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No actions</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -82,3 +110,4 @@ export default async function EggCollectionPage() {
     </div>
   );
 }
+

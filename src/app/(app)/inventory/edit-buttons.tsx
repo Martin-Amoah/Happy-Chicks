@@ -33,6 +33,10 @@ type FeedAllocationRecord = {
   allocated_by: string;
 }
 
+interface EditFeedButtonsProps {
+    feedTypes: { id: string; name: string }[];
+}
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -51,7 +55,7 @@ function SubmitButton() {
   );
 }
 
-export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
+export function EditFeedStockButton({ record, feedTypes }: { record: FeedStockRecord } & EditFeedButtonsProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const initialState: FormState = { message: "", success: undefined };
@@ -96,7 +100,14 @@ export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="feedType-edit">Feed Type</Label>
-                        <Input id="feedType-edit" name="feedType" defaultValue={record.feed_type} />
+                        <Select name="feedType" defaultValue={record.feed_type}>
+                            <SelectTrigger id="feedType-edit"><SelectValue placeholder="Select feed type" /></SelectTrigger>
+                            <SelectContent>
+                                {feedTypes.map((type) => (
+                                    <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                     </div>
                     <div className="space-y-1.5">
@@ -136,7 +147,7 @@ export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
   );
 }
 
-export function EditFeedAllocationButton({ record, userName }: { record: FeedAllocationRecord, userName: string }) {
+export function EditFeedAllocationButton({ record, userName, feedTypes }: { record: FeedAllocationRecord, userName: string } & EditFeedButtonsProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const initialState: FormState = { message: "", success: undefined };
@@ -196,7 +207,14 @@ export function EditFeedAllocationButton({ record, userName }: { record: FeedAll
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="feedType-alloc-edit">Feed Type</Label>
-                        <Input id="feedType-alloc-edit" name="feedType" defaultValue={record.feed_type} />
+                         <Select name="feedType" defaultValue={record.feed_type}>
+                            <SelectTrigger id="feedType-alloc-edit"><SelectValue placeholder="Select feed type" /></SelectTrigger>
+                            <SelectContent>
+                                {feedTypes.map((type) => (
+                                    <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                     </div>
                     <div className="space-y-1.5">

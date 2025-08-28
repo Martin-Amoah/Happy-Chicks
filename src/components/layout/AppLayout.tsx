@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -106,3 +105,4 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     </SidebarProvider>
   );
 }
+

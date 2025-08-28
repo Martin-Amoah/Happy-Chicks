@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +8,13 @@ import { format } from "date-fns";
 
 export default async function DeadBirdsPage() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  // guard against auth being undefined during prerender/build
+  let user: any = null;
+  if (supabase.auth && typeof supabase.auth.getUser === "function") {
+    const userRes = await supabase.auth.getUser();
+    user = userRes?.data?.user ?? null;
+  }
 
   const [mortalityResponse, profileResponse] = await Promise.all([
     supabase.from('mortality_records').select('*').order('created_at', { ascending: false }),

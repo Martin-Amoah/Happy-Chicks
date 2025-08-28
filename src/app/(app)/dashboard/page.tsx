@@ -8,6 +8,8 @@ import {
 } from 'date-fns';
 import { DashboardClientContent } from './client';
 
+export const dynamic = 'force-dynamic';
+
 async function getDashboardData() {
   const supabase = createClient();
   const today = startOfToday();
@@ -15,7 +17,6 @@ async function getDashboardData() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch profile and tasks in parallel with other data
   const [
     eggCollectionData,
     mortalityData,
@@ -24,7 +25,7 @@ async function getDashboardData() {
     farmConfigData,
     profileResponse,
     tasksResponse,
-    usersResponse,
+    usersResponse
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
@@ -36,9 +37,23 @@ async function getDashboardData() {
     supabase.from('profiles').select('id, full_name'),
   ]);
   
-  const userRole = profileResponse?.data?.role ?? 'Worker';
-  const tasks = tasksResponse.data ?? [];
-  const users = usersResponse.data ?? [];
+  // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
+  const userRole = (user?.email === 'happychicks@admin.com' || profileResponse?.data?.role === 'Manager') ? 'Manager' : 'Worker';
+
+  // If the user is not a manager, we don't need to fetch all the detailed data.
+  // This is a failsafe; the UI will show the worker dashboard.
+  if (userRole !== 'Manager') {
+    return {
+      userRole,
+      dashboardData: {
+        kpis: {},
+        charts: {},
+        activityLog: []
+      },
+      tasks: tasksResponse.data || [],
+      users: usersResponse.data || []
+    };
+  }
 
   const farmConfig = farmConfigData.data;
   const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
@@ -50,8 +65,6 @@ async function getDashboardData() {
     // Return empty/default data to prevent crash
     return {
       userRole,
-      tasks,
-      users,
       dashboardData: {
         kpis: {
           totalEggsToday: 'N/A',
@@ -68,7 +81,9 @@ async function getDashboardData() {
           mortalityRateTrend: []
         },
         activityLog: []
-      }
+      },
+       tasks: [],
+       users: []
     };
   }
 
@@ -148,8 +163,6 @@ async function getDashboardData() {
 
   return {
     userRole,
-    tasks,
-    users,
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
@@ -166,7 +179,9 @@ async function getDashboardData() {
         mortalityRateTrend: dailyMortalityData
       },
       activityLog: allActivities
-    }
+    },
+    tasks: tasksResponse.data || [],
+    users: usersResponse.data || []
   }
 }
 

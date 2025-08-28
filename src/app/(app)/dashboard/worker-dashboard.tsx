@@ -26,7 +26,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
       <Card className="bg-gradient-to-r from-card to-card/80">
         <CardHeader>
           <CardTitle className="font-headline text-3xl">Worker Dashboard</CardTitle>
-          <CardDescription className="text-base">Welcome back! Here are your quick actions and assigned tasks.</CardDescription>
+          <CardDescription className="text-base">This is a placeholder for the worker view. Currently, only the manager role is active.</CardDescription>
         </CardHeader>
       </Card>
 

@@ -13,6 +13,17 @@ import { addFeedAllocation, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
+interface AddFeedAllocationFormProps {
+  userName: string;
+  feedTypes: { id: string; name: string }[];
+}
+
+const exampleFeedTypes = [
+    { id: 'ex1', name: 'Layer Mash' },
+    { id: 'ex2', name: 'Grower Mash' },
+    { id: 'ex3', name: 'Chick Mash' },
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -23,7 +34,7 @@ function SubmitButton() {
   );
 }
 
-export function AddFeedAllocationForm({ userName }: { userName: string }) {
+export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocationFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -44,6 +55,8 @@ export function AddFeedAllocationForm({ userName }: { userName: string }) {
 
   const today = format(new Date(), 'PPP');
   const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
+  const combinedFeedTypes = [...exampleFeedTypes, ...feedTypes].filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i);
+
 
   return (
     <Card>
@@ -76,7 +89,14 @@ export function AddFeedAllocationForm({ userName }: { userName: string }) {
                 </div>
                  <div className="space-y-1.5">
                     <Label htmlFor="feedType">Feed Type</Label>
-                    <Input id="feedType" name="feedType" placeholder="e.g., Layers Mash" />
+                    <Select name="feedType">
+                        <SelectTrigger id="feedType"><SelectValue placeholder="Select a feed type" /></SelectTrigger>
+                        <SelectContent>
+                            {combinedFeedTypes.map((type) => (
+                                <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                 </div>
                  <div className="space-y-1.5">

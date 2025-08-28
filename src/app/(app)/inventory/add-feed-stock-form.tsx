@@ -13,6 +13,16 @@ import { addFeedStock, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
+interface AddFeedStockFormProps {
+    feedTypes: { id: string; name: string }[];
+}
+
+const exampleFeedTypes = [
+    { id: 'ex1', name: 'Layer Mash' },
+    { id: 'ex2', name: 'Grower Mash' },
+    { id: 'ex3', name: 'Chick Mash' },
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -23,7 +33,7 @@ function SubmitButton() {
   );
 }
 
-export function AddFeedStockForm() {
+export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -42,7 +52,12 @@ export function AddFeedStockForm() {
     }
   }, [state, toast]);
 
+<<<<<<< HEAD
   const today = format(new Date(), 'PPP');
+=======
+  const today = new Date().toISOString().split('T')[0];
+  const combinedFeedTypes = [...exampleFeedTypes, ...feedTypes].filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i);
+>>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
 
   return (
     <Card>
@@ -61,7 +76,14 @@ export function AddFeedStockForm() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="feedType">Feed Type</Label>
-            <Input id="feedType" name="feedType" placeholder="e.g., Layers Mash" />
+            <Select name="feedType">
+                <SelectTrigger id="feedType"><SelectValue placeholder="Select a feed type" /></SelectTrigger>
+                <SelectContent>
+                    {combinedFeedTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
              {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
           </div>
           <div className="space-y-1.5">
@@ -89,8 +111,13 @@ export function AddFeedStockForm() {
             <Input id="cost" name="cost" type="number" step="0.01" placeholder="e.g., 50.00" />
           </div>
         </CardContent>
+<<<<<<< HEAD
         <CardFooter className="flex justify-end">
           <SubmitButton />
+=======
+        <CardFooter className="flex justify-end pt-2">
+            <SubmitButton />
+>>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
         </CardFooter>
       </form>
     </Card>
