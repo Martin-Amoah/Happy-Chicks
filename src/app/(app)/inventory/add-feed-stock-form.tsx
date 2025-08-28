@@ -52,12 +52,8 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
     }
   }, [state, toast]);
 
-<<<<<<< HEAD
-  const today = format(new Date(), 'PPP');
-=======
   const today = new Date().toISOString().split('T')[0];
   const combinedFeedTypes = [...exampleFeedTypes, ...feedTypes].filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i);
->>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
 
   return (
     <Card>
@@ -111,13 +107,8 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
             <Input id="cost" name="cost" type="number" step="0.01" placeholder="e.g., 50.00" />
           </div>
         </CardContent>
-<<<<<<< HEAD
-        <CardFooter className="flex justify-end">
-          <SubmitButton />
-=======
         <CardFooter className="flex justify-end pt-2">
             <SubmitButton />
->>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
         </CardFooter>
       </form>
     </Card>

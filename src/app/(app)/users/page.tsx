@@ -14,19 +14,11 @@ export default async function UserManagementPage() {
   
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-<<<<<<< HEAD
-  // Fetch from the 'profiles' table directly, which is accessible via RLS policies.
-  const { data: users, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('full_name');
-=======
   // Use the new user_details view which joins auth.users and profiles
   const [usersResponse, profileResponse] = await Promise.all([
       supabase.from('user_details').select('*').order('email'),
       currentUser ? supabase.from('profiles').select('role').eq('id', currentUser.id).single() : Promise.resolve({ data: null })
   ]);
->>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
     
   const { data: users, error } = usersResponse;
   const isManager = profileResponse.data?.role === 'Manager';

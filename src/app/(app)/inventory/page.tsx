@@ -20,18 +20,11 @@ export default async function InventoryPage() {
     user = userRes?.data?.user ?? null;
   }
   
-<<<<<<< HEAD
-  const [stockResponse, allocationResponse, profileResponse] = await Promise.all([
-    supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
-    supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
-    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
-=======
   const [stockResponse, allocationResponse, profileResponse, feedTypesResponse] = await Promise.all([
     supabase.from('feed_stock').select('*').order('date', { ascending: false }),
     supabase.from('feed_allocations').select('*').order('date', { ascending: false }),
     user ? supabase.from('profiles').select('full_name, role').eq('id', user.id).single() : Promise.resolve({ data: null }),
     supabase.from('feed_types').select('*').order('name')
->>>>>>> 1e649807a4e2e319586969c489cb4b309277c3fc
   ]);
 
   const { data: feedStock, error: stockError } = stockResponse;
