@@ -6,11 +6,12 @@ import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Loader2, User } from "lucide-react";
+import { Edit, Loader2, User, Calendar } from "lucide-react";
 import { updateSale, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format } from 'date-fns';
 
 type SaleRecord = {
   id: string;
@@ -100,6 +101,8 @@ export function EditSaleButton({ record, userName }: { record: SaleRecord, userN
       }
   }, [state, toast]);
 
+  const today = format(new Date(), 'PPP');
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -110,15 +113,17 @@ export function EditSaleButton({ record, userName }: { record: SaleRecord, userN
         <DialogContent className="sm:max-w-xl">
             <DialogHeader>
                 <DialogTitle>Edit Sale Record</DialogTitle>
-                <DialogDescription>Update the details for this sale. Click save when you're done.</DialogDescription>
+                <DialogDescription>Update the details for this sale. The date will be set to today.</DialogDescription>
             </DialogHeader>
             <form action={formAction}>
                 <input type="hidden" name="id" value={record.id} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                     <div className="space-y-1.5">
-                        <Label htmlFor="date_edit">Date of Sale</Label>
-                        <Input id="date_edit" name="date" type="date" defaultValue={record.date} />
-                        {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                        <Label>Date of Sale</Label>
+                        <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                           <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                           <span>{today} (updates on save)</span>
+                        </div>
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="item_sold_edit">Item Sold</Label>

@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingCart, PlusCircle, Loader2, User } from "lucide-react";
+import { ShoppingCart, PlusCircle, Loader2, User, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addSale, type FormState } from './actions';
+import { format } from 'date-fns';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -84,7 +85,7 @@ export function AddSaleForm({ userName }: { userName: string }) {
     }
   }, [state, toast]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = format(new Date(), 'PPP');
   
   return (
     <Card>
@@ -92,14 +93,16 @@ export function AddSaleForm({ userName }: { userName: string }) {
         <CardTitle className="font-headline flex items-center gap-2">
           <ShoppingCart className="h-6 w-6 text-primary" /> Record New Sale
         </CardTitle>
-        <CardDescription>Log sales of farm produce and livestock.</CardDescription>
+        <CardDescription>Log sales of farm produce and livestock. The date is automatically set to today.</CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="date">Date of Sale</Label>
-            <Input id="date" name="date" type="date" defaultValue={today} />
-            {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+            <Label>Date of Sale</Label>
+            <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{today}</span>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="item_sold">Item Sold</Label>

@@ -3,14 +3,15 @@
 
 import React, { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PackagePlus, Loader2 } from "lucide-react";
+import { PackagePlus, Loader2, Calendar } from "lucide-react";
 import { addFeedStock, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
+import { format } from 'date-fns';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -41,20 +42,22 @@ export function AddFeedStockForm() {
     }
   }, [state, toast]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = format(new Date(), 'PPP');
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2"><PackagePlus className="h-6 w-6 text-primary" /> Add New Feed Stock</CardTitle>
-        <CardDescription>Record new arrivals of feed to the inventory.</CardDescription>
+        <CardDescription>Record new arrivals of feed to the inventory. The date is automatically set to today.</CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="date">Date</Label>
-            <Input id="date" name="date" type="date" defaultValue={today} />
-            {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+            <Label>Date</Label>
+            <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{today}</span>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="feedType">Feed Type</Label>
@@ -85,9 +88,9 @@ export function AddFeedStockForm() {
             <Label htmlFor="cost">Cost per Unit (Optional)</Label>
             <Input id="cost" name="cost" type="number" step="0.01" placeholder="e.g., 50.00" />
           </div>
-          <div className="md:col-span-2 lg:col-span-3 flex justify-end pt-2">
+          <CardFooter className="md:col-span-2 lg:col-span-3 flex justify-end p-0 pt-4">
             <SubmitButton />
-          </div>
+          </CardFooter>
         </CardContent>
       </form>
     </Card>

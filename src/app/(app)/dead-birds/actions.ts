@@ -4,9 +4,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
   shed: z.string().min(1, 'Shed is required'),
   count: z.coerce.number().int().min(1, 'Count must be at least 1'),
   cause: z.string().optional(),
@@ -59,7 +59,6 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
   }
 
   const validatedFields = formSchema.safeParse({
-    date: formData.get('mortalityDate'),
     shed: formData.get('shed'),
     count: formData.get('count'),
     cause: formData.get('cause'),
@@ -73,8 +72,9 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
     };
   }
   
-  const { date, shed, count, cause } = validatedFields.data;
+  const { shed, count, cause } = validatedFields.data;
   const recorded_by = await getCurrentUserFullName();
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase.from('mortality_records').insert({
     date,
@@ -94,6 +94,7 @@ export async function addMortalityRecord(prevState: FormState | undefined, formD
   }
 
   revalidatePath('/dead-birds');
+  revalidatePath('/dashboard');
 
   return {
     message: 'Successfully logged mortality record.',
@@ -107,7 +108,6 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
 
   const validatedFields = updateFormSchema.safeParse({
     id: formData.get('id'),
-    date: formData.get('mortalityDate'),
     shed: formData.get('shed'),
     count: formData.get('count'),
     cause: formData.get('cause'),
@@ -121,8 +121,9 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
     };
   }
   
-  const { id, date, shed, count, cause } = validatedFields.data;
+  const { id, shed, count, cause } = validatedFields.data;
   const recorded_by = await getCurrentUserFullName();
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase
     .from('mortality_records')
@@ -138,6 +139,7 @@ export async function updateMortalityRecord(prevState: FormState | undefined, fo
   }
 
   revalidatePath('/dead-birds');
+  revalidatePath('/dashboard');
 
   return {
     message: 'Successfully updated mortality record.',
@@ -156,5 +158,6 @@ export async function deleteMortalityRecord(id: string): Promise<{ message: stri
   }
 
   revalidatePath('/dead-birds');
+  revalidatePath('/dashboard');
   return { message: 'Successfully deleted mortality record.', success: true };
 }

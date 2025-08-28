@@ -4,10 +4,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { format } from 'date-fns';
 
 // Schema for adding feed stock
 const addFeedStockSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
   feedType: z.string().min(1, 'Feed type is required'),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
@@ -22,7 +22,6 @@ const updateFeedStockSchema = addFeedStockSchema.extend({
 
 // Schema for adding feed allocation
 const addFeedAllocationSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
   shed: z.string().min(1, 'Shed is required'),
   feedType: z.string().min(1, 'Feed type is required'),
   quantityAllocated: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
@@ -72,7 +71,8 @@ export async function addFeedStock(prevState: FormState | undefined, formData: F
     };
   }
   
-  const { date, feedType, quantity, unit, supplier, cost } = validatedFields.data;
+  const { feedType, quantity, unit, supplier, cost } = validatedFields.data;
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase.from('feed_stock').insert({
     date,
@@ -90,6 +90,7 @@ export async function addFeedStock(prevState: FormState | undefined, formData: F
   }
 
   revalidatePath('/inventory');
+  revalidatePath('/dashboard');
   return { message: 'Successfully added feed stock.', success: true };
 }
 
@@ -106,7 +107,8 @@ export async function updateFeedStock(prevState: FormState | undefined, formData
         };
     }
 
-    const { id, date, feedType, quantity, unit, supplier, cost } = validatedFields.data;
+    const { id, feedType, quantity, unit, supplier, cost } = validatedFields.data;
+    const date = format(new Date(), 'yyyy-MM-dd');
 
     const { error } = await supabase
         .from('feed_stock')
@@ -126,6 +128,7 @@ export async function updateFeedStock(prevState: FormState | undefined, formData
     }
 
     revalidatePath('/inventory');
+    revalidatePath('/dashboard');
     return { message: 'Successfully updated feed stock.', success: true };
 }
 
@@ -145,8 +148,9 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
         };
     }
 
-    const { date, shed, feedType, quantityAllocated, unit } = validatedFields.data;
+    const { shed, feedType, quantityAllocated, unit } = validatedFields.data;
     const allocated_by = await getCurrentUserFullName();
+    const date = format(new Date(), 'yyyy-MM-dd');
 
     const { error } = await supabase.from('feed_allocations').insert({
         date,
@@ -164,6 +168,7 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
     }
 
     revalidatePath('/inventory');
+    revalidatePath('/dashboard');
     return { message: 'Successfully allocated feed.', success: true };
 }
 
@@ -180,8 +185,9 @@ export async function updateFeedAllocation(prevState: FormState | undefined, for
         };
     }
 
-    const { id, date, shed, feedType, quantityAllocated, unit } = validatedFields.data;
+    const { id, shed, feedType, quantityAllocated, unit } = validatedFields.data;
     const allocated_by = await getCurrentUserFullName();
+    const date = format(new Date(), 'yyyy-MM-dd');
 
     const { error } = await supabase
         .from('feed_allocations')
@@ -201,6 +207,7 @@ export async function updateFeedAllocation(prevState: FormState | undefined, for
     }
 
     revalidatePath('/inventory');
+    revalidatePath('/dashboard');
     return { message: 'Successfully updated allocation.', success: true };
 }
 
@@ -216,6 +223,7 @@ export async function deleteFeedStock(id: string): Promise<{ message: string; su
   }
 
   revalidatePath('/inventory');
+  revalidatePath('/dashboard');
   return { message: 'Successfully deleted feed stock.', success: true };
 }
 
@@ -230,5 +238,6 @@ export async function deleteFeedAllocation(id: string): Promise<{ message: strin
     }
 
     revalidatePath('/inventory');
+    revalidatePath('/dashboard');
     return { message: 'Successfully deleted allocation.', success: true };
 }

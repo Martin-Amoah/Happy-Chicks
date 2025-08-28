@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BirdIcon } from "@/components/icons/BirdIcon";
-import { PlusCircle, Loader2, User } from "lucide-react";
+import { PlusCircle, Loader2, User, Calendar } from "lucide-react";
 import { addMortalityRecord, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
+import { format } from 'date-fns';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -50,7 +51,7 @@ export function AddMortalityRecordForm({ userName }: { userName: string }) {
       }
   }, [state, toast]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = format(new Date(), 'PPP'); // Format for display: e.g., "May 18, 2024"
   const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
 
   return (
@@ -60,13 +61,15 @@ export function AddMortalityRecordForm({ userName }: { userName: string }) {
           <CardTitle className="font-headline flex items-center gap-2">
             <BirdIcon className="h-6 w-6 text-destructive" /> Record Dead Birds
           </CardTitle>
-          <CardDescription>Log instances of bird mortality and adjust shed populations.</CardDescription>
+          <CardDescription>Log instances of bird mortality. The date is automatically set to today.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="mortalityDate">Date</Label>
-            <Input id="mortalityDate" name="mortalityDate" type="date" defaultValue={today} />
-             {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+            <Label>Date</Label>
+            <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>{today}</span>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="shed">Shed</Label>

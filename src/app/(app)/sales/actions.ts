@@ -4,9 +4,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
   item_sold: z.string().min(1, 'Item sold is required'),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
@@ -56,9 +56,11 @@ export async function addSale(prevState: FormState | undefined, formData: FormDa
   }
   
   const recorded_by = await getCurrentUserFullName();
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase.from('sales').insert({
     ...validatedFields.data,
+    date,
     recorded_by,
     user_id: user.id,
   });
@@ -86,10 +88,11 @@ export async function updateSale(prevState: FormState | undefined, formData: For
   
   const recorded_by = await getCurrentUserFullName();
   const { id, ...saleData } = validatedFields.data;
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase
     .from('sales')
-    .update({ ...saleData, recorded_by })
+    .update({ ...saleData, date, recorded_by })
     .match({ id });
 
   if (error) {

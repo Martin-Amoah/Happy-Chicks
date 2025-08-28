@@ -6,11 +6,12 @@ import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Loader2, User } from "lucide-react";
+import { Edit, Loader2, User, Calendar } from "lucide-react";
 import { updateFeedStock, updateFeedAllocation, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from 'date-fns';
 
 type FeedStockRecord = {
   id: string;
@@ -68,6 +69,8 @@ export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
           setOpen(false);
       }
   }, [state, toast]);
+  
+  const today = format(new Date(), 'PPP');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,15 +82,17 @@ export function EditFeedStockButton({ record }: { record: FeedStockRecord }) {
         <DialogContent className="sm:max-w-xl">
             <DialogHeader>
                 <DialogTitle>Edit Feed Stock Record</DialogTitle>
-                <DialogDescription>Update the details for this stock item. Click save when you're done.</DialogDescription>
+                <DialogDescription>Update the details for this stock item. The date will be set to today.</DialogDescription>
             </DialogHeader>
             <form action={formAction}>
                 <input type="hidden" name="id" value={record.id} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                      <div className="space-y-1.5">
-                        <Label htmlFor="date-edit">Date</Label>
-                        <Input id="date-edit" name="date" type="date" defaultValue={record.date} />
-                        {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                        <Label>Date</Label>
+                        <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                           <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                           <span>{today} (updates on save)</span>
+                        </div>
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="feedType-edit">Feed Type</Label>
@@ -150,6 +155,8 @@ export function EditFeedAllocationButton({ record, userName }: { record: FeedAll
           setOpen(false);
       }
   }, [state, toast]);
+  
+  const today = format(new Date(), 'PPP');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -161,15 +168,17 @@ export function EditFeedAllocationButton({ record, userName }: { record: FeedAll
         <DialogContent className="sm:max-w-xl">
             <DialogHeader>
                 <DialogTitle>Edit Feed Allocation</DialogTitle>
-                <DialogDescription>Update the details for this allocation record. Click save when you're done.</DialogDescription>
+                <DialogDescription>Update the details for this allocation record. The date will be set to today.</DialogDescription>
             </DialogHeader>
             <form action={formAction}>
                 <input type="hidden" name="id" value={record.id} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                     <div className="space-y-1.5">
-                        <Label htmlFor="date-alloc-edit">Allocation Date</Label>
-                        <Input id="date-alloc-edit" name="date" type="date" defaultValue={record.date} />
-                        {state.errors?.date && <p className="text-sm font-medium text-destructive">{state.errors.date[0]}</p>}
+                        <Label>Allocation Date</Label>
+                        <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                           <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                           <span>{today} (updates on save)</span>
+                        </div>
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="shed-alloc-edit">Shed</Label>

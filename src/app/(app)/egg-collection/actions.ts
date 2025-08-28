@@ -4,9 +4,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
   shed: z.string().min(1, 'Shed is required'),
   collection_time: z.string().min(1, 'Collection time is required'),
   total_eggs: z.coerce.number().int().min(0, 'Total eggs cannot be negative'),
@@ -66,7 +66,6 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
   }
 
   const validatedFields = formSchema.safeParse({
-    date: formData.get('collectionDate'),
     shed: formData.get('shed'),
     collection_time: formData.get('collection_time'),
     total_eggs: formData.get('totalEggs'),
@@ -81,9 +80,10 @@ export async function addEggCollection(prevState: FormState | undefined, formDat
     };
   }
   
-  const { date, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
+  const { shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
   const collected_by = await getCurrentUserFullName();
   const { crates, pieces } = calculateCratesAndPieces(total_eggs);
+  const date = format(new Date(), 'yyyy-MM-dd');
 
 
   const { error } = await supabase.from('egg_collections').insert({
@@ -120,7 +120,6 @@ export async function updateEggCollection(prevState: FormState | undefined, form
 
   const validatedFields = updateFormSchema.safeParse({
     id: formData.get('id'),
-    date: formData.get('collectionDate'),
     shed: formData.get('shed'),
     collection_time: formData.get('collection_time'),
     total_eggs: formData.get('totalEggs'),
@@ -135,9 +134,10 @@ export async function updateEggCollection(prevState: FormState | undefined, form
     };
   }
   
-  const { id, date, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
+  const { id, shed, collection_time, total_eggs, broken_eggs } = validatedFields.data;
   const collected_by = await getCurrentUserFullName();
   const { crates, pieces } = calculateCratesAndPieces(total_eggs);
+  const date = format(new Date(), 'yyyy-MM-dd');
 
   const { error } = await supabase
     .from('egg_collections')
