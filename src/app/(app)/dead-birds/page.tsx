@@ -13,11 +13,16 @@ export default async function DeadBirdsPage() {
 
   const [mortalityResponse, profileResponse] = await Promise.all([
     supabase.from('mortality_records').select('*').order('created_at', { ascending: false }),
-    user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+    user ? supabase.from('profiles').select('full_name, role, assigned_shed').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
   const { data: mortalityData, error } = mortalityResponse;
-  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const profile = profileResponse.data;
+  
+  const userName = profile?.full_name ?? user?.email ?? "Current User";
+  const isManager = profile?.role === 'Manager';
+  const assignedShed = profile?.assigned_shed;
+
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -25,7 +30,7 @@ export default async function DeadBirdsPage() {
 
   return (
     <div className="space-y-6">
-      <AddMortalityRecordForm userName={userName} />
+      <AddMortalityRecordForm userName={userName} isManager={isManager} assignedShed={assignedShed} />
 
       <Card>
         <CardHeader>

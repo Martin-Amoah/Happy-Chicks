@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EggIcon } from "@/components/icons/EggIcon";
-import { PlusCircle, Loader2, User, Calendar } from "lucide-react";
+import { PlusCircle, Loader2, User, Calendar, Home } from "lucide-react";
 import { addEggCollection, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,7 +32,13 @@ function SubmitButton() {
   );
 }
 
-export function AddEggRecordForm({ userName }: { userName: string }) {
+interface AddEggRecordFormProps {
+    userName: string;
+    isManager: boolean;
+    assignedShed: string | null;
+}
+
+export function AddEggRecordForm({ userName, isManager, assignedShed }: AddEggRecordFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
@@ -61,9 +67,10 @@ export function AddEggRecordForm({ userName }: { userName: string }) {
       }
   }, [state, toast]);
 
-  const today = format(new Date(), 'PPP'); // Format for display: e.g., "May 18, 2024"
+  const today = format(new Date(), 'PPP');
   const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
   const collectionTimes = ["Morning (6:30 AM)", "Mid-day (11:00 AM)", "Afternoon (3:00 PM)", "Evening (5:30 PM)"];
+  const canSelectShed = isManager || !assignedShed;
 
   return (
     <Card>
@@ -84,16 +91,26 @@ export function AddEggRecordForm({ userName }: { userName: string }) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="shed">Shed</Label>
-            <Select name="shed">
-              <SelectTrigger id="shed">
-                <SelectValue placeholder="Select a shed" />
-              </SelectTrigger>
-              <SelectContent>
-                {sheds.map((shed) => (
-                  <SelectItem key={shed} value={shed}>{shed}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {canSelectShed ? (
+                <Select name="shed">
+                  <SelectTrigger id="shed">
+                    <SelectValue placeholder="Select a shed" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sheds.map((shed) => (
+                      <SelectItem key={shed} value={shed}>{shed}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+            ) : (
+                <>
+                    <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                        <Home className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <span>{assignedShed}</span>
+                    </div>
+                    <input type="hidden" name="shed" value={assignedShed ?? ''} />
+                </>
+            )}
             {state.errors?.shed && <p className="text-sm font-medium text-destructive">{state.errors.shed[0]}</p>}
           </div>
           <div className="space-y-1.5">

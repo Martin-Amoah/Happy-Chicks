@@ -13,11 +13,16 @@ export default async function EggCollectionPage() {
 
   const [eggCollectionResponse, profileResponse] = await Promise.all([
       supabase.from('egg_collections').select('*').order('created_at', { ascending: false }),
-      user ? supabase.from('profiles').select('full_name').eq('id', user.id).single() : Promise.resolve({ data: null })
+      user ? supabase.from('profiles').select('full_name, role, assigned_shed').eq('id', user.id).single() : Promise.resolve({ data: null })
   ]);
   
   const { data: eggCollectionData, error } = eggCollectionResponse;
-  const userName = profileResponse.data?.full_name ?? user?.email ?? "Current User";
+  const profile = profileResponse.data;
+
+  const userName = profile?.full_name ?? user?.email ?? "Current User";
+  const isManager = profile?.role === 'Manager';
+  const assignedShed = profile?.assigned_shed;
+
 
   if (error) {
     console.error("Supabase fetch error:", error.message);
@@ -26,7 +31,7 @@ export default async function EggCollectionPage() {
 
   return (
     <div className="space-y-6">
-      <AddEggRecordForm userName={userName} />
+      <AddEggRecordForm userName={userName} isManager={isManager} assignedShed={assignedShed} />
 
       <Card>
         <CardHeader>

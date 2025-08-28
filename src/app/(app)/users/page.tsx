@@ -1,6 +1,4 @@
 
-
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -71,6 +69,7 @@ export default async function UserManagementPage() {
                 <TableHead>Name</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Assigned Shed</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Last Login</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -86,6 +85,7 @@ export default async function UserManagementPage() {
                         {user.role}
                      </Badge>
                   </TableCell>
+                  <TableCell>{user.assigned_shed || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant={user.status === 'Active' ? 'outline' : 'destructive'} className={user.status === 'Active' ? 'border-green-500 text-green-600' : ''}>
                       {user.status || 'Invited'}
@@ -108,7 +108,7 @@ export default async function UserManagementPage() {
               ))}
               {(!users || users.length === 0) && (
                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">No users found.</TableCell>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">No users found.</TableCell>
                  </TableRow>
               )}
             </TableBody>
@@ -121,5 +121,3 @@ export default async function UserManagementPage() {
     </div>
   );
 }
-
-

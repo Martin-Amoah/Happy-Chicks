@@ -84,6 +84,7 @@ const updateSchema = z.object({
     full_name: z.string().min(1, "Full name is required."),
     role: z.enum(['Manager', 'Worker']),
     status: z.enum(['Active', 'Inactive']),
+    assigned_shed: z.string().optional().nullable(),
 });
 
 export type UpdateFormState = {
@@ -98,8 +99,16 @@ export async function updateUser(prevState: UpdateFormState | undefined, formDat
     if (!managerCheck) {
         return { message: "Permission denied. Only managers can update users.", success: false };
     }
+    
+    const assignedShedValue = formData.get('assigned_shed');
 
-    const validatedFields = updateSchema.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = updateSchema.safeParse({
+        id: formData.get('id'),
+        full_name: formData.get('full_name'),
+        role: formData.get('role'),
+        status: formData.get('status'),
+        assigned_shed: assignedShedValue === 'none' ? null : assignedShedValue,
+    });
 
     if (!validatedFields.success) {
         return {
@@ -109,12 +118,12 @@ export async function updateUser(prevState: UpdateFormState | undefined, formDat
         };
     }
     
-    const { id, full_name, role, status } = validatedFields.data;
+    const { id, full_name, role, status, assigned_shed } = validatedFields.data;
 
     const supabase = createClient();
     const { error } = await supabase
         .from('profiles')
-        .update({ full_name, role, status, updated_at: new Date().toISOString() })
+        .update({ full_name, role, status, assigned_shed, updated_at: new Date().toISOString() })
         .eq('id', id);
 
     if (error) {

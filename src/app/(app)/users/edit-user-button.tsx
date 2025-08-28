@@ -17,6 +17,7 @@ type UserDetail = {
     full_name: string | null;
     role: string | null;
     status: string | null;
+    assigned_shed: string | null;
 }
 
 function SubmitButton() {
@@ -33,6 +34,8 @@ export function EditUserButton({ user }: { user: UserDetail }) {
   const [open, setOpen] = useState(false);
   const initialState: UpdateFormState = { message: "", success: undefined };
   const [state, formAction] = useActionState(updateUser, initialState);
+  const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
+
 
   useEffect(() => {
       if (state?.message) {
@@ -52,7 +55,7 @@ export function EditUserButton({ user }: { user: UserDetail }) {
         <DialogTrigger asChild>
             <Button variant="ghost" size="icon" className="hover:text-accent"><Edit3 className="h-4 w-4" /></Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>Edit User Profile</DialogTitle>
                 <DialogDescription>Update user details and permissions. Click save when you're done.</DialogDescription>
@@ -75,6 +78,19 @@ export function EditUserButton({ user }: { user: UserDetail }) {
                             </SelectContent>
                         </Select>
                          {state?.errors?.role && <p className="text-sm font-medium text-destructive">{state.errors.role[0]}</p>}
+                    </div>
+                     <div className="space-y-1.5">
+                        <Label htmlFor="assigned_shed">Assigned Shed</Label>
+                        <Select name="assigned_shed" defaultValue={user.assigned_shed ?? 'none'}>
+                            <SelectTrigger id="assigned_shed"><SelectValue placeholder="Select shed" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                {sheds.map((shed) => (
+                                    <SelectItem key={shed} value={shed}>{shed}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                         {state?.errors?.assigned_shed && <p className="text-sm font-medium text-destructive">{state.errors.assigned_shed[0]}</p>}
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="edit_status">Status</Label>
