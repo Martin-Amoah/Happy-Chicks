@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
@@ -13,7 +14,7 @@ const chartData = [
   { month: "June", desktop: 214, mobile: 140 },
 ]
 
-const chartConfig = {
+const defaultChartConfig = {
   desktop: {
     label: "Desktop",
     color: "hsl(var(--chart-1))",
@@ -27,18 +28,28 @@ const chartConfig = {
 interface SampleBarChartProps {
   title: string;
   description: string;
-  data?: typeof chartData;
-  config?: typeof chartConfig;
-  dataKeys?: { x: string; y1: string; y2?: string };
+  data?: any[];
+  config?: ChartConfig;
+  dataKeys: { x: string; y1: string; y2?: string };
 }
 
 export function SampleBarChart({
   title,
   description,
   data = chartData,
-  config = chartConfig,
-  dataKeys = { x: "month", y1: "desktop", y2: "mobile" },
+  config = defaultChartConfig,
+  dataKeys,
 }: SampleBarChartProps) {
+
+  // Dynamically get the first key from the provided config for the Bar's name
+  const y1_config_key = Object.keys(config)[0];
+  const y1_config = config[y1_config_key];
+
+  // Dynamically get the second key if it exists
+  const y2_config_key = dataKeys.y2 ? Object.keys(config)[1] : undefined;
+  const y2_config = y2_config_key ? config[y2_config_key] : undefined;
+
+
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
@@ -81,9 +92,9 @@ export function SampleBarChart({
                 </ul>
               )}
             />
-            <Bar dataKey={dataKeys.y1} fill={config.desktop.color} radius={[4, 4, 0, 0]} name={config.desktop.label} />
-            {dataKeys.y2 && config.mobile && (
-              <Bar dataKey={dataKeys.y2} fill={config.mobile.color} radius={[4, 4, 0, 0]} name={config.mobile.label} />
+            <Bar dataKey={dataKeys.y1} fill={y1_config.color} radius={[4, 4, 0, 0]} name={y1_config.label} />
+            {dataKeys.y2 && y2_config && (
+              <Bar dataKey={dataKeys.y2} fill={y2_config.color} radius={[4, 4, 0, 0]} name={y2_config.label} />
             )}
           </BarChart>
         </ResponsiveContainer>

@@ -10,8 +10,6 @@ import { EggIcon } from "@/components/icons/EggIcon";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
 import { ListChecks, PlusCircle } from 'lucide-react';
-import { EditTaskButton } from '@/app/(app)/tasks/edit-task-button';
-import { DeleteTaskButton } from '@/app/(app)/tasks/delete-task-button';
 import { format } from 'date-fns';
 
 interface WorkerDashboardProps {
@@ -75,7 +73,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                 <TableHead>Description</TableHead>
                 <TableHead>Date Assigned</TableHead>
                 <TableHead>Due Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -88,7 +86,7 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
                     <TableCell>{task.created_at ? format(new Date(task.created_at), 'dd/MM/yyyy') : 'N/A'}</TableCell>
                     <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}</TableCell>
                     <TableCell className="text-right space-x-1">
-                      <span className="text-xs text-muted-foreground">No actions</span>
+                      <span className="text-xs text-muted-foreground">{task.status}</span>
                     </TableCell>
                   </TableRow>
                 )

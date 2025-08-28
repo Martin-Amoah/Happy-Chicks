@@ -5,7 +5,7 @@ import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SampleBarChart } from "@/components/charts/SampleBarChart";
 import { SampleLineChart } from "@/components/charts/SampleLineChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, AlertTriangle, Activity } from "lucide-react";
+import { Package, AlertTriangle, Activity, Target } from "lucide-react";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { EggIcon } from "@/components/icons/EggIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
@@ -40,12 +40,18 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Total Eggs Collected"
           value={kpis.totalEggsToday}
           icon={<EggIcon className="h-6 w-6 text-accent" />}
           description="Total eggs collected today"
+        />
+        <KpiCard
+          title="Avg. Eggs per Bird"
+          value={kpis.averageEggsPerBird}
+          icon={<Target className="h-6 w-6 text-accent" />}
+          description="Daily production efficiency"
         />
         <KpiCard
           title="Feed Consumption"
@@ -82,17 +88,17 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
       </div>
 
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-        <SampleLineChart
-          title="Egg Collection Trend"
-          description="Total eggs collected over the last 7 days."
-          data={charts.eggCollectionTrend}
-          dataKeys={{x: "date", y: "value"}}
-          config={{ value: { label: "Total Eggs", color: "hsl(var(--chart-1))" } }}
-          yAxisFormatter={(value) => `${value}`}
-          yAxisDomain={['auto', 'auto']}
+        <SampleBarChart
+            title="Egg Collection per Shed (Today)"
+            description="Total eggs collected from each shed today."
+            data={charts.eggCollectionPerShed}
+            dataKeys={{x: "shed", y1: "eggs"}}
+            config={{
+                eggs: { label: "Total Eggs", color: "hsl(var(--chart-1))" }
+            }}
         />
         <SampleBarChart
-          title="Feed Consumption Analysis"
+          title="Feed Consumption per Shed"
           description="Total feed consumption per shed (units)."
           data={charts.feedConsumptionAnalysis}
           dataKeys={{x: "category", y1: "current"}}

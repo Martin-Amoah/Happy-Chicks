@@ -60,9 +60,10 @@ async function getDashboardData() {
           activeBirds: 'N/A',
           brokenEggs: 'N/A',
           feedInventory: 'N/A',
+          averageEggsPerBird: 'N/A',
         },
         charts: {
-          eggCollectionTrend: [],
+          eggCollectionPerShed: [],
           feedConsumptionAnalysis: [],
           mortalityRateTrend: []
         },
@@ -85,6 +86,7 @@ async function getDashboardData() {
   const eggsToday = eggs.filter(e => e.date === todayStr);
   
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
+  const averageEggsPerBird = activeBirds > 0 ? (totalEggsToday / activeBirds).toFixed(2) : '0.00';
 
   const feedTodayInBags = allocations.filter(a => a.date === todayStr && a.unit === 'bags');
   const feedConsumptionToday = feedTodayInBags.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
@@ -104,14 +106,15 @@ async function getDashboardData() {
   const feedInventory = totalStock - totalAllocated;
 
   // --- Chart Data ---
-  const dailyEggData = eachDayOfInterval({ start: sevenDaysAgo, end: today })
-    .map(day => {
-      const formattedDay = format(day, 'yyyy-MM-dd');
-      const dailyEggs = eggs
-        .filter(e => e.date === formattedDay)
-        .reduce((sum, e) => sum + e.total_eggs, 0);
-      return { date: format(day, 'dd/MM'), value: dailyEggs };
-    });
+  const eggsByShedToday = eggsToday.reduce((acc, curr) => {
+    acc[curr.shed] = (acc[curr.shed] || 0) + curr.total_eggs;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const eggCollectionPerShed = Object.entries(eggsByShedToday).map(([shed, total]) => ({
+    shed: shed,
+    eggs: total
+  }));
 
   const feedByShed = allocations.reduce((acc, curr) => {
     acc[curr.shed] = (acc[curr.shed] || 0) + curr.quantity_allocated;
@@ -150,6 +153,7 @@ async function getDashboardData() {
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
+        averageEggsPerBird: `${averageEggsPerBird}`,
         feedConsumption: `${feedConsumptionToday} bag/day`,
         mortalityRate: mortalityLast7Days,
         activeBirds: activeBirds.toLocaleString(),
@@ -157,7 +161,7 @@ async function getDashboardData() {
         feedInventory: `${feedInventory} Bags`,
       },
       charts: {
-        eggCollectionTrend: dailyEggData,
+        eggCollectionPerShed,
         feedConsumptionAnalysis,
         mortalityRateTrend: dailyMortalityData
       },
