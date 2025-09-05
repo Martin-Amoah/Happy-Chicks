@@ -2,6 +2,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignInClientPage } from "./client";
 
+
+export const dynamic = "force-dynamic";
+
+
 export default async function SignInPage() {
   const supabase = createClient();
   
