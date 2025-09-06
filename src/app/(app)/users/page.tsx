@@ -8,24 +8,30 @@ import { AddUserButton } from "./add-user-button";
 import { EditUserButton } from "./edit-user-button";
 import { DeleteUserButton } from "./delete-user-button";
 import { format } from "date-fns";
+import { redirect } from "next/navigation";
 
 export default async function UserManagementPage() {
   const supabase = createClient();
   
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  // Fetch from the 'profiles' table directly, which is accessible via RLS policies.
+  if (!currentUser) {
+    return redirect('/login');
+  }
+    
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single();
+
+  const isManager = profile?.role === 'Manager';
+
+  if (!isManager) {
+    return redirect('/dashboard');
+  }
+
+  // Fetch all user profiles since we've confirmed the current user is a manager.
   const { data: users, error } = await supabase
     .from('profiles')
     .select('*')
     .order('full_name');
-    
-  // The current user's role is still needed from the profiles table
-  const { data: profile } = currentUser 
-    ? await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
-    : { data: null };
-
-  const isManager = profile?.role === 'Manager';
 
   if (error) {
     console.error("Error fetching users:", error.message);
@@ -41,7 +47,7 @@ export default async function UserManagementPage() {
       </Card>
     )
   }
-//commit
+
   return (
     <div className="space-y-6">
       <Card>
@@ -53,7 +59,7 @@ export default async function UserManagementPage() {
             <CardDescription>Manage users, roles, and permissions within Happy Chicks.</CardDescription>
           </div>
           <div className="mt-4 sm:mt-0">
-             {isManager && <AddUserButton />}
+             <AddUserButton />
           </div>
         </CardHeader>
       </Card>
@@ -95,7 +101,7 @@ export default async function UserManagementPage() {
                     {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "dd/MM/yyyy HH:mm") : 'Never'}
                   </TableCell>
                   <TableCell className="text-right space-x-1">
-                    {isManager && currentUser?.id !== user.id ? (
+                    {currentUser?.id !== user.id ? (
                         <>
                             <EditUserButton user={user} />
                             <DeleteUserButton userId={user.id} userName={user.full_name} />

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -25,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-export function AppLayout({ children, user }: { children: React.ReactNode; user: User }) {
+export function AppLayout({ children, user, userRole }: { children: React.ReactNode; user: User, userRole: string }) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -69,7 +70,7 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
           </div>
         </SidebarHeader>
         <SidebarContent className="p-2">
-          <SidebarNav />
+          <SidebarNav userRole={userRole} />
         </SidebarContent>
         <Separator className="my-2" />
         <SidebarFooter className="p-4 flex flex-col gap-2">
@@ -105,4 +106,3 @@ export function AppLayout({ children, user }: { children: React.ReactNode; user:
     </SidebarProvider>
   );
 }
-

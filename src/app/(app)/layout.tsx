@@ -23,8 +23,16 @@ export default async function AuthenticatedAppLayout({
     return redirect('/login');
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const userRole = profile?.role ?? 'Worker';
+
   return (
-    <AppLayout user={user}>
+    <AppLayout user={user} userRole={userRole}>
       <div className="h-full">
         {children}
       </div>

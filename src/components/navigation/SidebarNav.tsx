@@ -10,7 +10,14 @@ import { FeedIcon } from "@/components/icons/FeedIcon";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { LayoutDashboard, FileText, Settings2, Users, ShoppingCart } from "lucide-react";
 
-const navItems = [
+interface NavItem {
+    href: string;
+    label: string;
+    icon: React.ElementType;
+    managerOnly?: boolean;
+}
+
+const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Inventory", icon: FeedIcon },
   { href: "/egg-collection", label: "Egg Collection", icon: EggIcon },
@@ -18,15 +25,19 @@ const navItems = [
   { href: "/sales", label: "Sales Tracking", icon: ShoppingCart },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings2 },
-  { href: "/users", label: "User Management", icon: Users },
+  { href: "/users", label: "User Management", icon: Users, managerOnly: true },
 ];
 
-export function SidebarNav() {
+export function SidebarNav({ userRole }: { userRole: string }) {
   const pathname = usePathname();
 
   return (
     <SidebarMenu>
       {navItems.map((item) => {
+        if (item.managerOnly && userRole !== 'Manager') {
+            return null;
+        }
+
         const Icon = item.icon;
         const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard") || (item.href === "/dashboard" && pathname === "/");
         
