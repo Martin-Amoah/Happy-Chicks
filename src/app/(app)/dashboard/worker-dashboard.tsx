@@ -5,12 +5,10 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EggIcon } from "@/components/icons/EggIcon";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
-import { ListChecks, PlusCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { PlusCircle } from 'lucide-react';
 
 interface WorkerDashboardProps {
   tasks: any[];
@@ -18,8 +16,6 @@ interface WorkerDashboardProps {
 }
 
 export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
-
-  const pendingTasks = tasks.filter(t => t.status !== 'Completed');
 
   return (
     <div className="space-y-6">
@@ -56,48 +52,6 @@ export function WorkerDashboard({ tasks, users }: WorkerDashboardProps) {
               <span className="text-base">Allocate Feed</span>
             </Link>
           </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2 text-2xl">
-            <ListChecks className="h-6 w-6 text-primary" /> My Assigned Tasks
-          </CardTitle>
-          <CardDescription>Tasks assigned to you. Update the status as you work on them.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead>Date Assigned</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead className="text-right">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pendingTasks && pendingTasks.map((task) => {
-                return (
-                  <TableRow key={task.id}>
-                    <TableCell className="font-medium max-w-xs truncate" title={task.description ?? ''}>
-                      {task.description || 'N/A'}
-                    </TableCell>
-                    <TableCell>{task.created_at ? format(new Date(task.created_at), 'dd/MM/yyyy') : 'N/A'}</TableCell>
-                    <TableCell>{task.due_date ? format(new Date(task.due_date + 'T00:00:00'), 'dd/MM/yyyy') : 'N/A'}</TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <span className="text-xs text-muted-foreground">{task.status}</span>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-              {(!pendingTasks || pendingTasks.length === 0) && (
-                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">You have no pending tasks. Great job!</TableCell>
-                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
         </CardContent>
       </Card>
     </div>
