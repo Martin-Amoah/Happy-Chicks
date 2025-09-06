@@ -46,11 +46,17 @@ async function getDashboardData() {
 
     const totalEggsCollectedByWorker = workerEggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
 
+    const totalCratesByWorker = workerEggsToday.reduce((acc, curr) => acc + curr.crates, 0);
+    const totalPiecesByWorker = workerEggsToday.reduce((acc, curr) => acc + curr.pieces, 0);
+    const finalCratesByWorker = totalCratesByWorker + Math.floor(totalPiecesByWorker / 30);
+    const finalPiecesByWorker = totalPiecesByWorker % 30;
+
     return {
       userRole,
       dashboardData: {
         workerKpis: {
             totalEggs: totalEggsCollectedByWorker,
+            cratesAndPieces: `${finalCratesByWorker} Crates, ${finalPiecesByWorker} Pieces`,
             eggCollectionEntries: workerEggsToday.length,
             mortalityEntries: workerMortalityToday.length,
             feedAllocationEntries: workerFeedToday.length,

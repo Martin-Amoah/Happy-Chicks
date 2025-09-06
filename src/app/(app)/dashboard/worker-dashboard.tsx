@@ -13,6 +13,7 @@ import { ClipboardCheck, PlusCircle, TrendingUp } from 'lucide-react';
 interface WorkerDashboardProps {
   kpis: {
     totalEggs: number;
+    cratesAndPieces: string;
     eggCollectionEntries: number;
     mortalityEntries: number;
     feedAllocationEntries: number;
@@ -25,7 +26,7 @@ function ProgressCard({ title, value, icon }: { title: string, value: string | n
       {icon}
       <div>
         <p className="text-sm text-muted-foreground">{title}</p>
-        <p className="text-2xl font-bold font-headline text-primary">{value}</p>
+        <p className="text-xl font-bold font-headline text-primary">{value}</p>
       </div>
     </div>
   )
@@ -83,6 +84,11 @@ export function WorkerDashboard({ kpis }: WorkerDashboardProps) {
                   <ProgressCard 
                     title="Eggs You Collected"
                     value={kpis?.totalEggs ?? 0}
+                    icon={<EggIcon className="h-8 w-8 text-accent" />}
+                  />
+                  <ProgressCard 
+                    title="Crates & Pieces"
+                    value={kpis?.cratesAndPieces ?? "0 Crates, 0 Pieces"}
                     icon={<EggIcon className="h-8 w-8 text-accent" />}
                   />
                    <ProgressCard 
