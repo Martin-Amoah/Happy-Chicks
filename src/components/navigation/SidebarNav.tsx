@@ -14,18 +14,18 @@ interface NavItem {
     href: string;
     label: string;
     icon: React.ElementType;
-    managerOnly?: boolean;
+    roles: string[]; // 'Manager', 'Worker', 'Sales Rep'
 }
 
 const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/inventory", label: "Inventory", icon: FeedIcon },
-  { href: "/egg-collection", label: "Egg Collection", icon: EggIcon },
-  { href: "/dead-birds", label: "Dead Birds Record", icon: BirdIcon },
-  { href: "/sales", label: "Sales Tracking", icon: ShoppingCart },
-  { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/settings", label: "Settings", icon: Settings2 },
-  { href: "/users", label: "User Management", icon: Users, managerOnly: true },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ['Manager', 'Worker', 'Sales Rep'] },
+  { href: "/inventory", label: "Inventory", icon: FeedIcon, roles: ['Manager', 'Worker'] },
+  { href: "/egg-collection", label: "Egg Collection", icon: EggIcon, roles: ['Manager', 'Worker'] },
+  { href: "/dead-birds", label: "Dead Birds Record", icon: BirdIcon, roles: ['Manager', 'Worker'] },
+  { href: "/sales", label: "Sales Tracking", icon: ShoppingCart, roles: ['Manager', 'Sales Rep'] },
+  { href: "/reports", label: "Reports", icon: FileText, roles: ['Manager'] },
+  { href: "/settings", label: "Settings", icon: Settings2, roles: ['Manager', 'Worker', 'Sales Rep'] },
+  { href: "/users", label: "User Management", icon: Users, roles: ['Manager'] },
 ];
 
 export function SidebarNav({ userRole }: { userRole: string }) {
@@ -34,7 +34,7 @@ export function SidebarNav({ userRole }: { userRole: string }) {
   return (
     <SidebarMenu>
       {navItems.map((item) => {
-        if (item.managerOnly && userRole !== 'Manager') {
+        if (!item.roles.includes(userRole)) {
             return null;
         }
 

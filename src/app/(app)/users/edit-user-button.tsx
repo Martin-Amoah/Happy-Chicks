@@ -75,6 +75,7 @@ export function EditUserButton({ user }: { user: UserDetail }) {
                             <SelectContent>
                                 <SelectItem value="Worker">Worker</SelectItem>
                                 <SelectItem value="Manager">Manager</SelectItem>
+                                <SelectItem value="Sales Rep">Sales Rep</SelectItem>
                             </SelectContent>
                         </Select>
                          {state?.errors?.role && <p className="text-sm font-medium text-destructive">{state.errors.role[0]}</p>}

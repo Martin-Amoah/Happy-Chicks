@@ -28,8 +28,16 @@ export default async function AuthenticatedAppLayout({
     .select('role')
     .eq('id', user.id)
     .single();
+    
+  let userRole = 'Worker'; // Default role
+  if (user.email === 'happychicks@admin.com' || profile?.role === 'Manager') {
+      userRole = 'Manager';
+  } else if (profile?.role === 'Sales Rep') {
+      userRole = 'Sales Rep';
+  } else if (profile?.role) {
+      userRole = profile.role;
+  }
 
-  const userRole = profile?.role ?? 'Worker';
 
   return (
     <AppLayout user={user} userRole={userRole}>

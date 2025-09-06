@@ -26,7 +26,7 @@ async function isManager() {
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address."),
   full_name: z.string().min(1, "Full name is required."),
-  role: z.enum(['Manager', 'Worker']),
+  role: z.enum(['Manager', 'Worker', 'Sales Rep']),
 });
 
 export type InviteFormState = {
@@ -82,7 +82,7 @@ export async function inviteUser(prevState: InviteFormState | undefined, formDat
 const updateSchema = z.object({
     id: z.string().uuid("Invalid user ID."),
     full_name: z.string().min(1, "Full name is required."),
-    role: z.enum(['Manager', 'Worker']),
+    role: z.enum(['Manager', 'Worker', 'Sales Rep']),
     status: z.enum(['Active', 'Inactive']),
     assigned_shed: z.string().optional().nullable(),
 });

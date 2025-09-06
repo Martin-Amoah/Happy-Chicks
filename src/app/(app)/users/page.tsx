@@ -87,7 +87,7 @@ export default async function UserManagementPage() {
                   <TableCell className="font-medium">{user.full_name || 'N/A'}</TableCell>
                   <TableCell className="hidden sm:table-cell">{user.email || 'Invited'}</TableCell>
                   <TableCell>
-                     <Badge variant={user.role === 'Manager' ? 'default' : 'secondary'}>
+                     <Badge variant={user.role === 'Manager' ? 'default' : user.role === 'Sales Rep' ? 'secondary' : 'outline'}>
                         {user.role}
                      </Badge>
                   </TableCell>

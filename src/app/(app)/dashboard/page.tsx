@@ -17,29 +17,58 @@ async function getDashboardData() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  const profileResponse = user ? await supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null });
+
+  // Robust role check: default to 'Worker' unless explicitly 'Manager' or 'Sales Rep'
+  let userRole = 'Worker';
+  if (user?.email === 'happychicks@admin.com' || profileResponse?.data?.role === 'Manager') {
+    userRole = 'Manager';
+  } else if (profileResponse?.data?.role === 'Sales Rep') {
+    userRole = 'Sales Rep';
+  }
+  
+  const todayStr = format(today, 'yyyy-MM-dd');
+
+  // --- Role-Specific Data Fetching ---
+
+  if (userRole === 'Sales Rep' && user) {
+      const { data: salesData, error } = await supabase.from('sales').select('*').gte('date', format(subDays(today, 30), 'yyyy-MM-dd'));
+      if (error) {
+        console.error("Sales data fetch error:", error.message);
+        return { userRole, dashboardData: { salesKpis: { totalRevenue: 'N/A', totalSales: 'N/A' }, recentSales: [] }};
+      }
+      
+      const salesToday = (salesData || []).filter(s => s.date === todayStr);
+      const totalRevenueToday = salesToday.reduce((acc, curr) => acc + curr.total_price, 0);
+
+      return {
+        userRole,
+        dashboardData: {
+            salesKpis: {
+                totalRevenue: `GH₵${totalRevenueToday.toFixed(2)}`,
+                totalSales: salesToday.length,
+            },
+            recentSales: (salesData || []).sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5),
+        }
+      }
+  }
+
   const [
     eggCollectionData,
     mortalityData,
     feedAllocationData,
     feedStockData,
     farmConfigData,
-    profileResponse,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
     supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
-    user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null }),
   ]);
   
-  // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
-  const userRole = (user?.email === 'happychicks@admin.com' || profileResponse?.data?.role === 'Manager') ? 'Manager' : 'Worker';
-
-  const todayStr = format(today, 'yyyy-MM-dd');
-
-  // If the user is not a manager, calculate worker-specific stats.
-  if (userRole !== 'Manager' && user) {
+  // If the user is a worker, calculate worker-specific stats.
+  if (userRole === 'Worker' && user) {
     const workerEggsToday = (eggCollectionData.data || []).filter(e => e.user_id === user.id && e.date === todayStr);
     const workerMortalityToday = (mortalityData.data || []).filter(m => m.user_id === user.id && m.date === todayStr);
     const workerFeedToday = (feedAllocationData.data || []).filter(a => a.user_id === user.id && a.date === todayStr);
@@ -65,6 +94,7 @@ async function getDashboardData() {
     };
   }
 
+  // --- Manager Data Calculations ---
   const farmConfig = farmConfigData.data;
   const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
 
@@ -100,39 +130,24 @@ async function getDashboardData() {
   const allocations = feedAllocationData.data || [];
   const stocks = feedStockData.data || [];
 
-  // --- KPI Calculations ---
-  
   const totalMortalityAllTime = mortalities.reduce((acc, curr) => acc + curr.count, 0);
   const activeBirds = BIRD_START_COUNT - totalMortalityAllTime;
-
   const eggsToday = eggs.filter(e => e.date === todayStr);
-  
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
-
   const feedTodayInBags = allocations.filter(a => a.date === todayStr && a.unit === 'bags');
   const feedConsumptionToday = feedTodayInBags.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
-
   const mortalityLast7Days = mortalities
     .filter(m => new Date(m.date + 'T00:00:00') >= sevenDaysAgo)
     .reduce((acc, curr) => acc + curr.count, 0);
-
   const brokenEggsToday = eggsToday.reduce((acc, curr) => acc + curr.broken_eggs, 0);
-  
-  const totalStock = stocks
-    .filter(s => s.unit === 'bags')
-    .reduce((acc, curr) => acc + curr.quantity, 0);
-  const totalAllocated = allocations
-    .filter(a => a.unit === 'bags')
-    .reduce((acc, curr) => acc + curr.quantity_allocated, 0);
+  const totalStock = stocks.filter(s => s.unit === 'bags').reduce((acc, curr) => acc + curr.quantity, 0);
+  const totalAllocated = allocations.filter(a => a.unit === 'bags').reduce((acc, curr) => acc + curr.quantity_allocated, 0);
   const feedInventory = totalStock - totalAllocated;
-  
   const totalCrates = eggsToday.reduce((acc, curr) => acc + curr.crates, 0);
   const totalPieces = eggsToday.reduce((acc, curr) => acc + curr.pieces, 0);
   const finalCrates = totalCrates + Math.floor(totalPieces / 30);
   const finalPieces = totalPieces % 30;
 
-
-  // --- Chart Data ---
   const eggsByShedToday = eggsToday.reduce((acc, curr) => {
     acc[curr.shed] = (acc[curr.shed] || 0) + curr.total_eggs;
     return acc;
@@ -147,6 +162,7 @@ async function getDashboardData() {
     acc[curr.shed] = (acc[curr.shed] || 0) + curr.quantity_allocated;
     return acc;
   }, {} as Record<string, number>);
+
   const feedConsumptionAnalysis = Object.entries(feedByShed).map(([shed, total]) => ({
     category: shed,
     current: total
@@ -161,7 +177,6 @@ async function getDashboardData() {
         return { date: format(day, 'dd/MM'), value: dailyDeaths };
     });
 
-  // --- Activity Log ---
   const latestAllocations = allocations.slice(0, 3).map(a => ({ type: 'feed_allocation', created_at: a.created_at, data: a }));
   const latestMortality = mortalities
     .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
