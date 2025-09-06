@@ -77,6 +77,7 @@ async function getDashboardData() {
           activeBirds: 'N/A',
           brokenEggs: 'N/A',
           feedInventory: 'N/A',
+          cratesAndPieces: 'N/A',
         },
         charts: {
           eggCollectionPerShed: [],
@@ -118,6 +119,12 @@ async function getDashboardData() {
     .filter(a => a.unit === 'bags')
     .reduce((acc, curr) => acc + curr.quantity_allocated, 0);
   const feedInventory = totalStock - totalAllocated;
+  
+  const totalCrates = eggsToday.reduce((acc, curr) => acc + curr.crates, 0);
+  const totalPieces = eggsToday.reduce((acc, curr) => acc + curr.pieces, 0);
+  const finalCrates = totalCrates + Math.floor(totalPieces / 30);
+  const finalPieces = totalPieces % 30;
+
 
   // --- Chart Data ---
   const eggsByShedToday = eggsToday.reduce((acc, curr) => {
@@ -165,6 +172,7 @@ async function getDashboardData() {
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
+        cratesAndPieces: `${finalCrates} Crates, ${finalPieces} Pieces`,
         feedConsumption: `${feedConsumptionToday} bag/day`,
         mortalityRate: mortalityLast7Days,
         activeBirds: activeBirds.toLocaleString(),

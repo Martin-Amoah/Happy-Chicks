@@ -48,6 +48,12 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
           description="Total eggs collected today"
         />
         <KpiCard
+          title="Total Crates & Pieces"
+          value={kpis.cratesAndPieces}
+          icon={<EggIcon className="h-6 w-6 text-accent" />}
+          description="Total crates and pieces today"
+        />
+        <KpiCard
           title="Feed Consumption"
           value={kpis.feedConsumption}
           icon={<FeedIcon className="h-6 w-6 text-accent" />}
