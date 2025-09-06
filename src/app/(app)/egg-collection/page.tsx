@@ -18,17 +18,22 @@ export default async function EggCollectionPage() {
     user = userRes?.data?.user ?? null;
   }
 
-  const [eggCollectionResponse, profileResponse] = await Promise.all([
-      supabase.from('egg_collections').select('*').order('created_at', { ascending: false }),
-      user ? supabase.from('profiles').select('full_name, role, assigned_shed').eq('id', user.id).single() : Promise.resolve({ data: null })
-  ]);
-  
-  const { data: eggCollectionData, error } = eggCollectionResponse;
+  const profileResponse = user ? await supabase.from('profiles').select('full_name, role, assigned_shed').eq('id', user.id).single() : { data: null };
   const profile = profileResponse.data;
-
+  
   const userName = profile?.full_name ?? user?.email ?? "Current User";
   const isManager = profile?.role === 'Manager';
   const assignedShed = profile?.assigned_shed;
+
+  let query = supabase.from('egg_collections').select('*');
+
+  // If the user is a worker, only fetch their own records.
+  if (!isManager && user) {
+    query = query.eq('user_id', user.id);
+  }
+
+  const eggCollectionResponse = await query.order('created_at', { ascending: false });
+  const { data: eggCollectionData, error } = eggCollectionResponse;
 
 
   if (error) {
