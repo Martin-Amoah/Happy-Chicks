@@ -91,7 +91,7 @@ export function WorkerDashboard({ kpis }: WorkerDashboardProps) {
                     icon={<ClipboardCheck className="h-8 w-8 text-accent" />}
                   />
                    <ProgressCard 
-                    title="Mortality Logs"
+                    title="Dead Birds Logs"
                     value={kpis?.mortalityEntries ?? 0}
                     icon={<ClipboardCheck className="h-8 w-8 text-destructive" />}
                   />
