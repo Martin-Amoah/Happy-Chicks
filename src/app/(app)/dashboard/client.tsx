@@ -10,5 +10,5 @@ export function DashboardClientContent({ userRole, dashboardData, tasks, users }
     }
     
     // Fallback to WorkerDashboard for any non-manager role.
-    return <WorkerDashboard tasks={tasks} users={users} />;
+    return <WorkerDashboard kpis={dashboardData.workerKpis} />;
 }

@@ -24,7 +24,6 @@ async function getDashboardData() {
     feedStockData,
     farmConfigData,
     profileResponse,
-    tasksResponse,
     usersResponse
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
@@ -33,24 +32,33 @@ async function getDashboardData() {
     supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
     user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null }),
-    user ? supabase.from('tasks').select('*, profiles (id, full_name)').eq('assigned_to_id', user.id).order('created_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
     supabase.from('profiles').select('id, full_name'),
   ]);
   
   // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
   const userRole = (user?.email === 'happychicks@admin.com' || profileResponse?.data?.role === 'Manager') ? 'Manager' : 'Worker';
 
-  // If the user is not a manager, we don't need to fetch all the detailed data.
-  // This is a failsafe; the UI will show the worker dashboard.
-  if (userRole !== 'Manager') {
+  const todayStr = format(today, 'yyyy-MM-dd');
+
+  // If the user is not a manager, calculate worker-specific stats.
+  if (userRole !== 'Manager' && user) {
+    const workerEggsToday = (eggCollectionData.data || []).filter(e => e.user_id === user.id && e.date === todayStr);
+    const workerMortalityToday = (mortalityData.data || []).filter(m => m.user_id === user.id && m.date === todayStr);
+    const workerFeedToday = (feedAllocationData.data || []).filter(a => a.user_id === user.id && a.date === todayStr);
+
+    const totalEggsCollectedByWorker = workerEggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
+
     return {
       userRole,
       dashboardData: {
-        kpis: {},
-        charts: {},
-        activityLog: []
+        workerKpis: {
+            totalEggs: totalEggsCollectedByWorker,
+            eggCollectionEntries: workerEggsToday.length,
+            mortalityEntries: workerMortalityToday.length,
+            feedAllocationEntries: workerFeedToday.length,
+        }
       },
-      tasks: tasksResponse.data || [],
+      tasks: [],
       users: usersResponse.data || []
     };
   }
@@ -93,7 +101,6 @@ async function getDashboardData() {
   const stocks = feedStockData.data || [];
 
   // --- KPI Calculations ---
-  const todayStr = format(today, 'yyyy-MM-dd');
   
   const totalMortalityAllTime = mortalities.reduce((acc, curr) => acc + curr.count, 0);
   const activeBirds = BIRD_START_COUNT - totalMortalityAllTime;
@@ -180,7 +187,7 @@ async function getDashboardData() {
       },
       activityLog: allActivities
     },
-    tasks: tasksResponse.data || [],
+    tasks: [],
     users: usersResponse.data || []
   }
 }
