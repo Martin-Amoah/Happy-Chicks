@@ -24,7 +24,6 @@ async function getDashboardData() {
     feedStockData,
     farmConfigData,
     profileResponse,
-    usersResponse
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
     supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
@@ -32,7 +31,6 @@ async function getDashboardData() {
     supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
     user ? supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null }),
-    supabase.from('profiles').select('id, full_name'),
   ]);
   
   // Robust role check: default to 'Worker' unless explicitly 'Manager' or the admin email.
@@ -58,8 +56,6 @@ async function getDashboardData() {
             feedAllocationEntries: workerFeedToday.length,
         }
       },
-      tasks: [],
-      users: usersResponse.data || []
     };
   }
 
@@ -90,8 +86,6 @@ async function getDashboardData() {
         },
         activityLog: []
       },
-       tasks: [],
-       users: []
     };
   }
 
@@ -187,20 +181,16 @@ async function getDashboardData() {
       },
       activityLog: allActivities
     },
-    tasks: [],
-    users: usersResponse.data || []
   }
 }
 
 export default async function DashboardPage() {
-  const { userRole, dashboardData, tasks, users } = await getDashboardData();
+  const { userRole, dashboardData } = await getDashboardData();
   
   return (
     <DashboardClientContent 
         userRole={userRole}
         dashboardData={dashboardData}
-        tasks={tasks}
-        users={users}
     />
   );
 }
