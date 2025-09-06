@@ -5,7 +5,7 @@ import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SampleBarChart } from "@/components/charts/SampleBarChart";
 import { SampleLineChart } from "@/components/charts/SampleLineChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, AlertTriangle, Activity, Target } from "lucide-react";
+import { Package, AlertTriangle, Activity } from "lucide-react";
 import { BirdIcon } from "@/components/icons/BirdIcon";
 import { EggIcon } from "@/components/icons/EggIcon";
 import { FeedIcon } from "@/components/icons/FeedIcon";
@@ -46,12 +46,6 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
           value={kpis.totalEggsToday}
           icon={<EggIcon className="h-6 w-6 text-accent" />}
           description="Total eggs collected today"
-        />
-        <KpiCard
-          title="Avg. Eggs per Bird"
-          value={kpis.averageEggsPerBird}
-          icon={<Target className="h-6 w-6 text-accent" />}
-          description="Daily production efficiency"
         />
         <KpiCard
           title="Feed Consumption"

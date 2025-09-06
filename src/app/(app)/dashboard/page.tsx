@@ -77,7 +77,6 @@ async function getDashboardData() {
           activeBirds: 'N/A',
           brokenEggs: 'N/A',
           feedInventory: 'N/A',
-          averageEggsPerBird: 'N/A',
         },
         charts: {
           eggCollectionPerShed: [],
@@ -102,7 +101,6 @@ async function getDashboardData() {
   const eggsToday = eggs.filter(e => e.date === todayStr);
   
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
-  const averageEggsPerBird = activeBirds > 0 ? (totalEggsToday / activeBirds).toFixed(2) : '0.00';
 
   const feedTodayInBags = allocations.filter(a => a.date === todayStr && a.unit === 'bags');
   const feedConsumptionToday = feedTodayInBags.reduce((acc, curr) => acc + curr.quantity_allocated, 0);
@@ -167,7 +165,6 @@ async function getDashboardData() {
     dashboardData: {
       kpis: {
         totalEggsToday: `${totalEggsToday} Eggs`,
-        averageEggsPerBird: `${averageEggsPerBird}`,
         feedConsumption: `${feedConsumptionToday} bag/day`,
         mortalityRate: mortalityLast7Days,
         activeBirds: activeBirds.toLocaleString(),
