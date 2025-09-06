@@ -25,7 +25,9 @@ export default async function AuthenticatedAppLayout({
 
   return (
     <AppLayout user={user}>
-      {children}
+      <div className="h-full">
+        {children}
+      </div>
     </AppLayout>
   );
 }

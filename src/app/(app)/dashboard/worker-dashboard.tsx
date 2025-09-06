@@ -34,23 +34,23 @@ function ProgressCard({ title, value, icon }: { title: string, value: string | n
 export function WorkerDashboard({ kpis }: WorkerDashboardProps) {
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-card to-card/80">
+    <div className="flex flex-col space-y-6 h-full">
+      <Card className="bg-gradient-to-r from-card to-card/80 flex-shrink-0">
         <CardHeader>
           <CardTitle className="font-headline text-3xl">Worker Dashboard</CardTitle>
           <CardDescription className="text-base">Your daily hub for farm activities and progress tracking.</CardDescription>
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow">
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle className="font-headline flex items-center gap-2 text-2xl">
                 <PlusCircle className="h-6 w-6 text-primary" /> Quick Actions
               </CardTitle>
               <CardDescription>Quickly log daily farm activities.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-grow content-center">
               <Button asChild variant="outline" size="lg" className="h-24 flex flex-col items-center justify-center gap-2 text-center">
                 <Link href="/egg-collection">
                   <EggIcon className="h-8 w-8 text-accent" />
@@ -72,14 +72,14 @@ export function WorkerDashboard({ kpis }: WorkerDashboardProps) {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2 text-2xl">
                     <TrendingUp className="h-6 w-6 text-primary" /> Today's Progress
                 </CardTitle>
                 <CardDescription>Your activity logged for today.</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow content-center">
                   <ProgressCard 
                     title="Eggs You Collected"
                     value={kpis?.totalEggs ?? 0}
