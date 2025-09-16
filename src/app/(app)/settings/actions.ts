@@ -165,3 +165,46 @@ export async function updateFarmConfiguration(prevState: FarmConfigFormState | u
   revalidatePath('/dashboard');
   return { message: 'Farm configuration updated successfully.', success: true };
 }
+
+
+export type BirdsFormState = {
+  message: string;
+  success?: boolean;
+};
+
+export async function updateBirdsPerShed(prevState: BirdsFormState | undefined, formData: FormData): Promise<BirdsFormState> {
+    const managerCheck = await isManager();
+    if (!managerCheck) {
+        return { message: "Permission denied.", success: false };
+    }
+
+    const supabase = createClient();
+    const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
+    const updates = [];
+
+    for (const shed of sheds) {
+        const count = formData.get(shed);
+        if (count !== null && count !== '') {
+            updates.push({
+                shed: shed,
+                count: Number(count),
+            });
+        }
+    }
+
+    if (updates.length === 0) {
+        return { message: "No data to update.", success: true };
+    }
+
+    const { error } = await supabase.from('birds_per_shed').upsert(updates, { onConflict: 'shed' });
+
+    if (error) {
+        console.error("Supabase birds per shed error:", error);
+        return { message: `Failed to update bird counts: ${error.message}`, success: false };
+    }
+    
+    revalidatePath('/settings');
+    revalidatePath('/dashboard');
+
+    return { message: "Successfully updated bird counts for all sheds.", success: true };
+}

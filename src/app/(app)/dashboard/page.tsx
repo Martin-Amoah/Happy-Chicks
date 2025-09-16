@@ -59,12 +59,14 @@ async function getDashboardData() {
     feedAllocationData,
     feedStockData,
     farmConfigData,
+    birdsPerShedData,
   ] = await Promise.all([
     supabase.from('egg_collections').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
-    supabase.from('mortality_records').select('*').gte('date', format(sevenDaysAgo, 'yyyy-MM-dd')),
+    supabase.from('mortality_records').select('*'), // Fetch all mortality for accurate counts
     supabase.from('feed_allocations').select('*').order('created_at', { ascending: false }),
     supabase.from('feed_stock').select('*').order('created_at', { ascending: false }),
     supabase.from('farm_config').select('*').eq('id', 1).single(),
+    supabase.from('birds_per_shed').select('*'),
   ]);
   
   // If the user is a worker, calculate worker-specific stats.
@@ -96,11 +98,10 @@ async function getDashboardData() {
 
   // --- Manager Data Calculations ---
   const farmConfig = farmConfigData.data;
-  const BIRD_START_COUNT = farmConfig?.initial_bird_count ?? 0;
 
-  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || (farmConfigData.error && farmConfigData.error.code !== 'PGRST116')) {
+  if (eggCollectionData.error || mortalityData.error || feedAllocationData.error || feedStockData.error || (farmConfigData.error && farmConfigData.error.code !== 'PGRST116') || birdsPerShedData.error) {
     console.error("Dashboard data fetch error:", 
-      eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message || farmConfigData.error?.message
+      eggCollectionData.error?.message || mortalityData.error?.message || feedAllocationData.error?.message || feedStockData.error?.message || farmConfigData.error?.message || birdsPerShedData.error?.message
     );
     // Return empty/default data to prevent crash
     return {
@@ -118,7 +119,8 @@ async function getDashboardData() {
         charts: {
           eggCollectionPerShed: [],
           feedConsumptionAnalysis: [],
-          mortalityRateTrend: []
+          mortalityRateTrend: [],
+          liveBirdsPerShed: [],
         },
         activityLog: []
       },
@@ -129,9 +131,21 @@ async function getDashboardData() {
   const mortalities = mortalityData.data || [];
   const allocations = feedAllocationData.data || [];
   const stocks = feedStockData.data || [];
+  const birdsPerShed = birdsPerShedData.data || [];
 
-  const totalMortalityAllTime = mortalities.reduce((acc, curr) => acc + curr.count, 0);
-  const activeBirds = BIRD_START_COUNT - totalMortalityAllTime;
+  const totalMortalityPerShed = mortalities.reduce((acc, curr) => {
+    acc[curr.shed] = (acc[curr.shed] || 0) + curr.count;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const liveBirdsPerShed = birdsPerShed.map(shedInfo => {
+    const totalDeaths = totalMortalityPerShed[shedInfo.shed] || 0;
+    const liveBirds = (shedInfo.count || 0) - totalDeaths;
+    return { shed: shedInfo.shed, birds: liveBirds };
+  });
+
+  const totalActiveBirds = liveBirdsPerShed.reduce((sum, shed) => sum + shed.birds, 0);
+
   const eggsToday = eggs.filter(e => e.date === todayStr);
   const totalEggsToday = eggsToday.reduce((acc, curr) => acc + curr.total_eggs, 0);
   const feedTodayInBags = allocations.filter(a => a.date === todayStr && a.unit === 'bags');
@@ -196,14 +210,15 @@ async function getDashboardData() {
         cratesAndPieces: `${finalCrates} Crates, ${finalPieces} Pieces`,
         feedConsumption: `${feedConsumptionToday} bag/day`,
         mortalityRate: mortalityLast7Days,
-        activeBirds: activeBirds.toLocaleString(),
+        activeBirds: totalActiveBirds.toLocaleString(),
         brokenEggs: `${brokenEggsToday}/day`,
         feedInventory: `${feedInventory} Bags`,
       },
       charts: {
         eggCollectionPerShed,
         feedConsumptionAnalysis,
-        mortalityRateTrend: dailyMortalityData
+        mortalityRateTrend: dailyMortalityData,
+        liveBirdsPerShed
       },
       activityLog: allActivities
     },

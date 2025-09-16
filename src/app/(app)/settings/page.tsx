@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { NotificationSettingsForm } from "./notification-settings-form";
 import { AccountSecurityForm } from "./account-security-form";
 import { FarmConfigurationForm } from "./farm-configuration-form";
+import { BirdsPerShedForm } from "./birds-per-shed-form";
 
 // A dedicated error component to avoid repeating JSX
 function SettingsErrorCard({ message, details }: { message: string, details?: string }) {
@@ -42,15 +43,22 @@ export default async function SettingsPage() {
         return <SettingsErrorCard message="Could not load your user profile from the database." details={profileError.message} />;
     }
     
-    const { data: farmConfig, error: farmConfigError } = await supabase
-        .from('farm_config')
-        .select('*')
-        .eq('id', 1) // Assuming a single config row with id 1
-        .single();
+    const [farmConfigResponse, birdsPerShedResponse] = await Promise.all([
+        supabase.from('farm_config').select('*').eq('id', 1).single(),
+        supabase.from('birds_per_shed').select('*')
+    ]);
+
+    const { data: farmConfig, error: farmConfigError } = farmConfigResponse;
+    const { data: birdsPerShed, error: birdsPerShedError } = birdsPerShedResponse;
 
     if (farmConfigError && farmConfigError.code !== 'PGRST116') {
         console.error("Supabase farm config error:", farmConfigError.message);
         return <SettingsErrorCard message="Could not load the farm configuration from the database." details={farmConfigError.message} />;
+    }
+    
+    if (birdsPerShedError) {
+        console.error("Supabase birds per shed error:", birdsPerShedError.message);
+        return <SettingsErrorCard message="Could not load the birds per shed data from the database." details={birdsPerShedError.message} />;
     }
 
     // Check if the user has the manager role. This is safe even if profile is null.
@@ -77,11 +85,14 @@ export default async function SettingsPage() {
             </div>
             
             {isManager && (
-                farmConfig ? (
-                    <FarmConfigurationForm config={farmConfig} />
-                ) : (
-                     <SettingsErrorCard message="Farm configuration is unavailable." details="No configuration data found in the database. A manager may need to set this up." />
-                )
+                <div className="space-y-6">
+                    {farmConfig ? (
+                        <FarmConfigurationForm config={farmConfig} />
+                    ) : (
+                         <SettingsErrorCard message="Farm configuration is unavailable." details="No configuration data found in the database. A manager may need to set this up." />
+                    )}
+                    <BirdsPerShedForm initialData={birdsPerShed ?? []} />
+                </div>
             )}
         </div>
     );

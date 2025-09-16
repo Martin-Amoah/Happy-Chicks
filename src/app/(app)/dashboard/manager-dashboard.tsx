@@ -98,12 +98,12 @@ export function ManagerDashboard({ kpis, charts, activityLog }: { kpis: any, cha
             }}
         />
         <SampleBarChart
-          title="Feed Consumption per Shed"
-          description="Total feed consumption per shed (units)."
-          data={charts.feedConsumptionAnalysis}
-          dataKeys={{x: "category", y1: "current"}}
+          title="Live Birds per Shed"
+          description="Current estimated live bird population in each shed."
+          data={charts.liveBirdsPerShed}
+          dataKeys={{x: "shed", y1: "birds"}}
           config={{
-            desktop: { label: "Allocated", color: "hsl(var(--chart-2))" }
+            birds: { label: "Live Birds", color: "hsl(var(--chart-3))" }
           }}
         />
       </div>
