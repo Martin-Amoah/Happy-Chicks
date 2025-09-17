@@ -17,7 +17,7 @@ async function getDashboardData() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const profileResponse = user ? await supabase.from('profiles').select('role').eq('id', user.id).single() : Promise.resolve({ data: null, error: null });
+  const profileResponse = user ? await supabase.from('profiles').select('role, assigned_shed').eq('id', user.id).single() : Promise.resolve({ data: null, error: null });
 
   // Robust role check: default to 'Worker' unless explicitly 'Manager' or 'Sales Rep'
   let userRole = 'Worker';
@@ -81,6 +81,20 @@ async function getDashboardData() {
     const totalPiecesByWorker = workerEggsToday.reduce((acc, curr) => acc + curr.pieces, 0);
     const finalCratesByWorker = totalCratesByWorker + Math.floor(totalPiecesByWorker / 30);
     const finalPiecesByWorker = totalPiecesByWorker % 30;
+    
+    let liveBirdsInShed = 0;
+    const assignedShed = profileResponse.data?.assigned_shed;
+    if (assignedShed) {
+        const shedInfo = (birdsPerShedData.data || []).find(s => s.shed === assignedShed);
+        const initialCount = shedInfo?.count ?? 0;
+        
+        const totalDeathsInShed = (mortalityData.data || [])
+            .filter(m => m.shed === assignedShed)
+            .reduce((sum, m) => sum + m.count, 0);
+            
+        liveBirdsInShed = initialCount - totalDeathsInShed;
+    }
+
 
     return {
       userRole,
@@ -91,6 +105,7 @@ async function getDashboardData() {
             eggCollectionEntries: workerEggsToday.length,
             mortalityEntries: workerMortalityToday.length,
             feedAllocationEntries: workerFeedToday.length,
+            liveBirdsInShed: liveBirdsInShed.toLocaleString()
         }
       },
     };

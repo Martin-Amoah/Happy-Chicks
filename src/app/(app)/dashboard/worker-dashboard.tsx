@@ -17,6 +17,7 @@ interface WorkerDashboardProps {
     eggCollectionEntries: number;
     mortalityEntries: number;
     feedAllocationEntries: number;
+    liveBirdsInShed: string;
   }
 }
 
@@ -81,6 +82,11 @@ export function WorkerDashboard({ kpis }: WorkerDashboardProps) {
                 <CardDescription>Your activity logged for today.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow content-center">
+                  <ProgressCard 
+                    title="Live Birds in Your Shed"
+                    value={kpis?.liveBirdsInShed ?? 'N/A'}
+                    icon={<BirdIcon className="h-8 w-8 text-accent" />}
+                  />
                   <ProgressCard 
                     title="Eggs You Collected"
                     value={kpis?.totalEggs ?? 0}
