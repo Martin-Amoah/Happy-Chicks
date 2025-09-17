@@ -6,20 +6,19 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { format } from 'date-fns';
 
-// Helper function to check if the current user is a manager
-async function isManager() {
+// Helper function to get current user's profile
+async function getCurrentUserProfile() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
+  if (!user) return null;
 
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, role, assigned_shed')
+      .eq('id', user.id)
+      .single();
   
-  if (error || !profile) return false;
-  return profile.role === 'Manager';
+  return { user, profile };
 }
 
 // --- Feed Type Actions ---
@@ -28,8 +27,8 @@ const feedTypeSchema = z.object({
 });
 
 export async function addFeedType(formData: FormData): Promise<{ message: string; success: boolean; }> {
-    const managerCheck = await isManager();
-    if (!managerCheck) return { message: "Permission denied.", success: false };
+    const userProfile = await getCurrentUserProfile();
+    if (userProfile?.profile?.role !== 'Manager') return { message: "Permission denied.", success: false };
 
     const validatedFields = feedTypeSchema.safeParse({ name: formData.get('name') });
     if (!validatedFields.success) return { message: "Invalid name.", success: false };
@@ -47,8 +46,8 @@ export async function addFeedType(formData: FormData): Promise<{ message: string
 }
 
 export async function deleteFeedType(id: string): Promise<{ message: string; success: boolean; }> {
-    const managerCheck = await isManager();
-    if (!managerCheck) return { message: "Permission denied.", success: false };
+    const userProfile = await getCurrentUserProfile();
+    if (userProfile?.profile?.role !== 'Manager') return { message: "Permission denied.", success: false };
 
     const supabase = createClient();
     const { error } = await supabase.from('feed_types').delete().eq('id', id);
@@ -89,6 +88,18 @@ const updateFeedAllocationSchema = addFeedAllocationSchema.extend({
     id: z.string().uuid("Invalid record ID"),
 });
 
+const recordFeedUsageSchema = z.object({
+  shed: z.string().min(1, 'Shed is required'),
+  feedType: z.string().min(1, 'Feed type is required'),
+  quantityUsed: z.coerce.number().min(0.1, 'Quantity used must be greater than 0'),
+  unit: z.string().min(1, 'Unit is required'),
+});
+
+const reportIssueSchema = z.object({
+    category: z.string().min(1, "Category is required."),
+    description: z.string().min(10, "Description must be at least 10 characters long."),
+});
+
 
 export type FormState = {
   message: string;
@@ -96,26 +107,10 @@ export type FormState = {
   success?: boolean;
 };
 
-async function getCurrentUserFullName() {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 'System';
-
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-    
-    return profile?.full_name ?? user.email ?? 'System';
-}
-
-
 // Action to add a new feed stock item
 export async function addFeedStock(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { message: 'Authentication error.', success: false };
+  const userProfile = await getCurrentUserProfile();
+  if (!userProfile?.user || userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
 
   const validatedFields = addFeedStockSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -130,6 +125,7 @@ export async function addFeedStock(prevState: FormState | undefined, formData: F
   const { feedType, quantity, unit, supplier, cost } = validatedFields.data;
   const date = format(new Date(), 'yyyy-MM-dd');
 
+  const supabase = createClient();
   const { error } = await supabase.from('feed_stock').insert({
     date,
     feed_type: feedType,
@@ -137,7 +133,7 @@ export async function addFeedStock(prevState: FormState | undefined, formData: F
     unit,
     supplier,
     cost,
-    user_id: user.id,
+    user_id: userProfile.user.id,
   });
 
   if (error) {
@@ -152,6 +148,9 @@ export async function addFeedStock(prevState: FormState | undefined, formData: F
 
 // Action to update a feed stock item
 export async function updateFeedStock(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
+    const userProfile = await getCurrentUserProfile();
+    if (userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
+
     const supabase = createClient();
     const validatedFields = updateFeedStockSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -190,9 +189,8 @@ export async function updateFeedStock(prevState: FormState | undefined, formData
 
 // Action to add a new feed allocation record
 export async function addFeedAllocation(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { message: 'Authentication error.', success: false };
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.user || userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
 
     const validatedFields = addFeedAllocationSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -205,9 +203,10 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
     }
 
     const { shed, feedType, quantityAllocated, unit } = validatedFields.data;
-    const allocated_by = await getCurrentUserFullName();
+    const allocated_by = userProfile.profile.full_name ?? userProfile.user.email ?? 'System';
     const date = format(new Date(), 'yyyy-MM-dd');
 
+    const supabase = createClient();
     const { error } = await supabase.from('feed_allocations').insert({
         date,
         shed,
@@ -215,7 +214,7 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
         quantity_allocated: quantityAllocated,
         unit,
         allocated_by,
-        user_id: user.id,
+        user_id: userProfile.user.id,
     });
 
     if (error) {
@@ -230,6 +229,9 @@ export async function addFeedAllocation(prevState: FormState | undefined, formDa
 
 // Action to update a feed allocation record
 export async function updateFeedAllocation(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.user || userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
+
     const supabase = createClient();
     const validatedFields = updateFeedAllocationSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -242,7 +244,7 @@ export async function updateFeedAllocation(prevState: FormState | undefined, for
     }
 
     const { id, shed, feedType, quantityAllocated, unit } = validatedFields.data;
-    const allocated_by = await getCurrentUserFullName();
+    const allocated_by = userProfile.profile.full_name ?? userProfile.user.email ?? 'System';
     const date = format(new Date(), 'yyyy-MM-dd');
 
     const { error } = await supabase
@@ -270,6 +272,9 @@ export async function updateFeedAllocation(prevState: FormState | undefined, for
 
 // Action to delete a feed stock item
 export async function deleteFeedStock(id: string): Promise<{ message: string; success: boolean; }> {
+  const userProfile = await getCurrentUserProfile();
+  if (userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
+  
   const supabase = createClient();
   const { error } = await supabase.from('feed_stock').delete().match({ id });
 
@@ -285,6 +290,9 @@ export async function deleteFeedStock(id: string): Promise<{ message: string; su
 
 // Action to delete a feed allocation record
 export async function deleteFeedAllocation(id: string): Promise<{ message: string; success: boolean; }> {
+    const userProfile = await getCurrentUserProfile();
+    if (userProfile?.profile?.role !== 'Manager') return { message: 'Permission denied.', success: false };
+
     const supabase = createClient();
     const { error } = await supabase.from('feed_allocations').delete().match({ id });
 
@@ -296,4 +304,88 @@ export async function deleteFeedAllocation(id: string): Promise<{ message: strin
     revalidatePath('/inventory');
     revalidatePath('/dashboard');
     return { message: 'Successfully deleted allocation.', success: true };
+}
+
+
+export async function recordFeedUsage(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.user || !userProfile?.profile) return { message: 'Authentication error.', success: false };
+
+    let shed = formData.get('shed') as string;
+    if (userProfile.profile.role === 'Worker' && userProfile.profile.assigned_shed) {
+        shed = userProfile.profile.assigned_shed;
+    }
+
+    const validatedFields = recordFeedUsageSchema.safeParse({
+        shed: shed,
+        feedType: formData.get('feedType'),
+        quantityUsed: formData.get('quantityUsed'),
+        unit: formData.get('unit'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            message: 'Invalid form data.',
+            errors: validatedFields.error.flatten().fieldErrors,
+            success: false,
+        };
+    }
+
+    const { feedType, quantityUsed, unit } = validatedFields.data;
+    const recorded_by = userProfile.profile.full_name ?? userProfile.user.email ?? 'System';
+    const date = format(new Date(), 'yyyy-MM-dd');
+    
+    const supabase = createClient();
+    const { error } = await supabase.from('feed_usage').insert({
+        date,
+        shed: validatedFields.data.shed,
+        feed_type: feedType,
+        quantity_used: quantityUsed,
+        unit,
+        recorded_by,
+        user_id: userProfile.user.id,
+    });
+
+    if (error) {
+        console.error('Supabase error:', error);
+        return { message: `Failed to record usage: ${error.message}`, success: false };
+    }
+
+    revalidatePath('/inventory');
+    revalidatePath('/dashboard');
+    return { message: 'Successfully recorded feed usage.', success: true };
+}
+
+export async function reportIssue(prevState: FormState | undefined, formData: FormData): Promise<FormState> {
+    const userProfile = await getCurrentUserProfile();
+    if (!userProfile?.user || !userProfile?.profile) return { message: 'Authentication error.', success: false };
+
+    const validatedFields = reportIssueSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: 'Invalid form data.',
+            errors: validatedFields.error.flatten().fieldErrors,
+            success: false,
+        };
+    }
+
+    const { category, description } = validatedFields.data;
+    const reported_by = userProfile.profile.full_name ?? userProfile.user.email ?? 'System';
+
+    const supabase = createClient();
+    const { error } = await supabase.from('issues').insert({
+        category,
+        description,
+        reported_by,
+        user_id: userProfile.user.id,
+    });
+
+    if (error) {
+        console.error('Supabase error:', error);
+        return { message: `Failed to report issue: ${error.message}`, success: false };
+    }
+    
+    revalidatePath('/inventory');
+    return { message: 'Successfully reported issue.', success: true };
 }

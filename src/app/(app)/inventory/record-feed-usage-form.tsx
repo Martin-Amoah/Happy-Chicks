@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, Loader2, User, Calendar } from "lucide-react";
-import { addFeedAllocation, type FormState } from './actions';
+import { Wrench, Loader2, User, Calendar, Home } from "lucide-react";
+import { recordFeedUsage, type FormState } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
-interface AddFeedAllocationFormProps {
+interface RecordFeedUsageFormProps {
   userName: string;
+  assignedShed: string | null;
   feedTypes: { id: string; name: string }[];
 }
 
@@ -22,17 +23,17 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-      {pending ? "Allocating..." : "Allocate Feed"}
+      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wrench className="mr-2 h-4 w-4" />}
+      {pending ? "Recording..." : "Record Usage"}
     </Button>
   );
 }
 
-export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocationFormProps) {
+export function RecordFeedUsageForm({ userName, assignedShed, feedTypes }: RecordFeedUsageFormProps) {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: FormState = { message: "", success: undefined };
-  const [state, formAction] = useActionState(addFeedAllocation, initialState);
+  const [state, formAction] = useActionState(recordFeedUsage, initialState);
 
   useEffect(() => {
     if (state.message) {
@@ -48,18 +49,17 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
   }, [state, toast]);
 
   const today = format(new Date(), 'PPP');
-  const sheds = ["Shed A", "Shed B", "Shed C", "Shed D", "Shed E"];
 
   return (
     <Card>
         <CardHeader>
-          <CardTitle className="font-headline flex items-center gap-2"><Send className="h-6 w-6 text-primary" /> Allocate Feed to Sheds</CardTitle>
-          <CardDescription>Record feed being moved from main stock to a specific shed for consumption. Date is set automatically.</CardDescription>
+          <CardTitle className="font-headline flex items-center gap-2"><Wrench className="h-6 w-6 text-primary" /> Record Daily Feed Usage</CardTitle>
+          <CardDescription>Log the amount of feed consumed in your assigned shed. The date is set automatically.</CardDescription>
         </CardHeader>
         <form action={formAction} ref={formRef}>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                    <Label>Allocation Date</Label>
+                    <Label>Date</Label>
                     <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
                         <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
                         <span>{today}</span>
@@ -67,16 +67,11 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
                 </div>
                 <div className="space-y-1.5">
                     <Label htmlFor="shed">Shed</Label>
-                     <Select name="shed">
-                      <SelectTrigger id="shed">
-                        <SelectValue placeholder="Select a shed" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sheds.map((shed) => (
-                          <SelectItem key={shed} value={shed}>{shed}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                        <Home className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <span>{assignedShed || 'Not Assigned'}</span>
+                    </div>
+                    <input type="hidden" name="shed" value={assignedShed ?? ''} />
                     {state.errors?.shed && <p className="text-sm font-medium text-destructive">{state.errors.shed[0]}</p>}
                 </div>
                  <div className="space-y-1.5">
@@ -92,9 +87,9 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
                     {state.errors?.feedType && <p className="text-sm font-medium text-destructive">{state.errors.feedType[0]}</p>}
                 </div>
                  <div className="space-y-1.5">
-                    <Label htmlFor="quantityAllocated">Quantity Allocated</Label>
-                    <Input id="quantityAllocated" name="quantityAllocated" type="number" placeholder="e.g., 5" />
-                    {state.errors?.quantityAllocated && <p className="text-sm font-medium text-destructive">{state.errors.quantityAllocated[0]}</p>}
+                    <Label htmlFor="quantityUsed">Quantity Used</Label>
+                    <Input id="quantityUsed" name="quantityUsed" type="number" step="0.1" placeholder="e.g., 4.5" />
+                    {state.errors?.quantityUsed && <p className="text-sm font-medium text-destructive">{state.errors.quantityUsed[0]}</p>}
                 </div>
                  <div className="space-y-1.5">
                     <Label htmlFor="unit">Unit</Label>
@@ -108,7 +103,7 @@ export function AddFeedAllocationForm({ userName, feedTypes }: AddFeedAllocation
                      {state.errors?.unit && <p className="text-sm font-medium text-destructive">{state.errors.unit[0]}</p>}
                 </div>
                 <div className="space-y-1.5">
-                    <Label>Allocated By</Label>
+                    <Label>Recorded By</Label>
                     <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
                         <User className="mr-2 h-4 w-4 text-muted-foreground" />
                         <span>{userName}</span>

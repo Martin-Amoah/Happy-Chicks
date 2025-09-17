@@ -17,12 +17,6 @@ interface AddFeedStockFormProps {
     feedTypes: { id: string; name: string }[];
 }
 
-const exampleFeedTypes = [
-    { id: 'ex1', name: 'Layer Mash' },
-    { id: 'ex2', name: 'Grower Mash' },
-    { id: 'ex3', name: 'Chick Mash' },
-];
-
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -52,8 +46,7 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
     }
   }, [state, toast]);
 
-  const today = new Date().toISOString().split('T')[0];
-  const combinedFeedTypes = [...exampleFeedTypes, ...feedTypes].filter((v,i,a)=>a.findIndex(t=>(t.name === v.name))===i);
+  const today = format(new Date(), 'PPP');
 
   return (
     <Card>
@@ -75,7 +68,7 @@ export function AddFeedStockForm({ feedTypes }: AddFeedStockFormProps) {
             <Select name="feedType">
                 <SelectTrigger id="feedType"><SelectValue placeholder="Select a feed type" /></SelectTrigger>
                 <SelectContent>
-                    {combinedFeedTypes.map((type) => (
+                    {feedTypes.map((type) => (
                         <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
                     ))}
                 </SelectContent>

@@ -19,7 +19,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ['Manager', 'Worker', 'Sales Rep'] },
-  { href: "/inventory", label: "Inventory", icon: FeedIcon, roles: ['Manager', 'Worker'] },
+  { href: "/inventory", label: "Feed Management", icon: FeedIcon, roles: ['Manager', 'Worker'] },
   { href: "/egg-collection", label: "Egg Collection", icon: EggIcon, roles: ['Manager', 'Worker'] },
   { href: "/dead-birds", label: "Dead Birds Record", icon: BirdIcon, roles: ['Manager', 'Worker'] },
   { href: "/sales", label: "Sales Tracking", icon: ShoppingCart, roles: ['Manager', 'Sales Rep'] },
